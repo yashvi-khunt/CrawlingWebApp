@@ -1,0 +1,9 @@
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.lockscreen {
+  background-color: #e9ecef;
+  height: 100vh;
+  display: flex;
+}
