@@ -1,35 +1,46 @@
 import React from "react";
+import { useForm } from "react-hook-form";
 
 function Register() {
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+    watch,
+  } = useForm();
+
+  const onSubmit = (data) => {
+    // Handle form submission here
+    console.log(data);
+  };
+
   return (
     <div className="hold-transition register-page">
       <div className="register-box">
         <div className="card card-outline card-primary">
           <div className="card-header text-center">
-            <a href="../../index2.html" className="h1">
+            <a href="/" className="h1">
               <b>Admin</b>LTE
             </a>
           </div>
           <div className="card-body">
             <p className="login-box-msg">Register a new membership</p>
-            <form action="../../index.html" method="post">
-              <div className="input-group mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Full name"
-                />
-                <div className="input-group-append">
-                  <div className="input-group-text">
-                    <span className="fas fa-user" />
-                  </div>
-                </div>
-              </div>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <div className="input-group mb-3">
                 <input
                   type="email"
                   className="form-control"
                   placeholder="Email"
+                  {...register("email", {
+                    required: {
+                      value: true,
+                      message: "Email field is required.",
+                    },
+                    pattern: {
+                      value: /^\S+@\S+\.\S+$/,
+                      message: "Please enter a valid email address.",
+                    },
+                  })}
                 />
                 <div className="input-group-append">
                   <div className="input-group-text">
@@ -42,6 +53,18 @@ function Register() {
                   type="password"
                   className="form-control"
                   placeholder="Password"
+                  {...register("password", {
+                    required: {
+                      value: true,
+                      message: "Password field is required.",
+                    },
+                    pattern: {
+                      value:
+                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@+._-])[a-zA-Z@+._-\d]{8,}$/,
+                      message:
+                        "Password should have atleast one uppercase,one lowercase, one special character and should be of the minimum length 8.",
+                    },
+                  })}
                 />
                 <div className="input-group-append">
                   <div className="input-group-text">
@@ -54,6 +77,23 @@ function Register() {
                   type="password"
                   className="form-control"
                   placeholder="Retype password"
+                  {...register("confirm-password", {
+                    required: {
+                      value: true,
+                      message: "Confirm Password field is required.",
+                    },
+                    pattern: {
+                      value:
+                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@+._-])[a-zA-Z@+._-\d]{8,}$/,
+                      message:
+                        "Password should have atleast one uppercase,one lowercase, one special character and should be of the minimum length 8.",
+                    },
+                    validate: (val: string) => {
+                      if (watch("password") != val) {
+                        return "Password and Confirm password should be same.";
+                      }
+                    },
+                  })}
                 />
                 <div className="input-group-append">
                   <div className="input-group-text">
@@ -62,32 +102,24 @@ function Register() {
                 </div>
               </div>
               <div className="row">
-                {/* /.col */}
                 <div className="col">
                   <button type="submit" className="btn btn-primary btn-block">
                     Register
                   </button>
                 </div>
-                {/* /.col */}
               </div>
             </form>
-            <div className="social-auth-links text-center">
-              <a href="#" className="btn btn-block btn-primary">
-                <i className="fab fa-facebook mr-2" />
-                Sign up using Facebook
-              </a>
+            <div className="social-auth-links text-center mt-2 mb-3">
               <a href="#" className="btn btn-block btn-danger">
-                <i className="fab fa-google-plus mr-2" />
-                Sign up using Google+
+                <i className="fa fa-brands fa-google mr-2" /> Sign in using
+                Google
               </a>
             </div>
-            <a href="login.html" className="text-center">
+            <a href="/auth/login" className="text-center">
               I already have a membership
             </a>
           </div>
-          {/* /.form-box */}
         </div>
-        {/* /.card */}
       </div>
     </div>
   );
