@@ -35,7 +35,12 @@ const AutoCompleteField = ({
     param.delete(paramKey);
 
     if (selectedValue && selectedValue.length !== 0) {
-      const ids = selectedValue.map((option) => option.label);
+      var ids;
+      if (paramKey === "UserIds") {
+        ids = selectedValue.map((option) => option.value);
+      } else {
+        ids = selectedValue.map((option) => option.label);
+      }
       param.append(paramKey, ids.join(`,`));
     }
 
@@ -47,8 +52,12 @@ const AutoCompleteField = ({
     var selectedOptions;
 
     const ids = searchParams.get(paramKey)?.split(",");
-    selectedOptions = options.filter((option) => ids?.includes(option.label));
-
+    var selectedOptions;
+    if (paramKey === "UserIds") {
+      selectedOptions = options.filter((option) => ids?.includes(option.value));
+    } else {
+      selectedOptions = options.filter((option) => ids?.includes(option.label));
+    }
     console.log(selectedOptions, options);
 
     setValue(multiple ? selectedOptions : selectedOptions[0]);

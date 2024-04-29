@@ -158,6 +158,11 @@ function Users() {
               <div className="col-sm-6">
                 <h1>Users</h1>
               </div>
+              <div className="col-sm-6">
+                <button className="btn btn-primary float-sm-right">
+                  Add User
+                </button>
+              </div>
             </div>
           </div>
           {/* /.container-fluid */}
@@ -165,7 +170,6 @@ function Users() {
         {/* Main content */}
         <section className="content">
           <div className="card">
-            <div className="card-header"></div>
             {/* /.card-header */}
             <div className="card-body">
               <Table {...pageInfo}>

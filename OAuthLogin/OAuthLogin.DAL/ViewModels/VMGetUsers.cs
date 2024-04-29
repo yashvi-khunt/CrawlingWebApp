@@ -30,5 +30,8 @@ namespace OAuthLogin.DAL.ViewModels
         public string? FromDate { get; set; }
         public string? ToDate { get; set; }
         public string? UserIds { get; set; }
+        public string? BrowserIds {  get; set; }    
+        public string? OsIds {  get; set; }
+        public string? DeviceIds {  get; set; }
     }
 }

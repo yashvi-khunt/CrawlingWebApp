@@ -1,5 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import GoogleAuthButton from "./GoogleAuthButton";
+import {
+  useGoogleLoginMutation,
+  useRegisterMutation,
+} from "../redux/api/authApi";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { login } from "../redux/slice/authSlice";
 
 function Register() {
   const {
@@ -9,9 +17,47 @@ function Register() {
     watch,
   } = useForm();
 
+  const [registerApi, { data, error: registerError }] = useRegisterMutation();
+  const dispatch = useDispatch();
+  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+  const [error, setError] = useState(null);
+
   const onSubmit = (data) => {
     // Handle form submission here
-    console.log(data);
+    setEmail(data.email);
+    registerApi(data as authTypes.loginRegisterParams);
+  };
+
+  const [googleLogin, { data: apisuccess, error: apiError }] =
+    useGoogleLoginMutation();
+
+  useEffect(() => {
+    setError(registerError?.data.message);
+  }, [registerError]);
+
+  useEffect(() => {
+    if (data?.success) navigate(`/auth/sent-confirm-email?email=${email}`);
+  }, [data?.data]);
+
+  useEffect(() => {
+    console.log(apisuccess);
+    if (apisuccess?.status) {
+      dispatch(login(apisuccess?.data?.token));
+      navigate("/");
+    }
+  }, [apisuccess?.data]);
+
+  useEffect(() => {
+    console.log(apiError);
+  }, [apiError]);
+
+  const handleSuccess = (response) => {
+    console.log(response);
+    googleLogin({ token: response.credential });
+  };
+  const handleFailure = (response) => {
+    console.log(response);
   };
 
   return (
@@ -110,10 +156,10 @@ function Register() {
               </div>
             </form>
             <div className="social-auth-links text-center mt-2 mb-3">
-              <a href="#" className="btn btn-block btn-danger">
-                <i className="fa fa-brands fa-google mr-2" /> Sign in using
-                Google
-              </a>
+              <GoogleAuthButton
+                onSuccess={handleSuccess}
+                onFailure={handleFailure}
+              />
             </div>
             <a href="/auth/login" className="text-center">
               I already have a membership

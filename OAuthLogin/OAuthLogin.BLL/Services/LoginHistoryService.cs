@@ -48,6 +48,9 @@ namespace OAuthLogin.BLL.Services
                 ToDate = vMGetHistoriesInput.ToDate ?? "",
                 FromDate = vMGetHistoriesInput.FromDate ?? "",
                 UserIds = vMGetHistoriesInput.UserIds ?? "",
+                BrowserIds = vMGetHistoriesInput.BrowserIds ?? "",
+                OsIds = vMGetHistoriesInput.OSIds ?? "",
+                DeviceIds = vMGetHistoriesInput.DeviceIds ?? "",
 
             };
 

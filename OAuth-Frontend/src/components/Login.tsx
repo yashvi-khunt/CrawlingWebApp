@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useAppDispatch } from "../redux/hooks";
 import { login } from "../redux/slice/authSlice";
 import { useNavigate } from "react-router-dom";
+import { Grid } from "@mui/material";
 
 function Login() {
   const { handleSubmit, register } = useForm();
@@ -112,6 +113,17 @@ function Login() {
                   </div>
                 </div>
               </div>
+              {error && (
+                <Grid
+                  item
+                  xs={12}
+                  textAlign="center"
+                  color="red"
+                  marginBottom={2}
+                >
+                  {error}
+                </Grid>
+              )}
               <div className="row">
                 <div className="col">
                   <button type="submit" className="btn btn-primary btn-block">
@@ -127,7 +139,7 @@ function Login() {
               />
             </div>
             <p className="mb-1">
-              <a href="forgot-password.html">I forgot my password</a>
+              <a href="/auth/forgot-password">Forgot password?</a>
             </p>
             <p className="mb-0">
               <a href="/auth/register" className="text-center">

@@ -12,7 +12,30 @@ export const loginHistoryApi = indexApi.injectEndpoints({
       }),
       providesTags: ["LoginHistory"],
     }),
+    browserHelper: builder.query<Global.helperList, void>({
+      query: () => ({
+        url: "LoginHistory/BrowserHelper",
+      }),
+      providesTags: ["LoginHistory", "User"],
+    }),
+    osHelper: builder.query<Global.helperList, void>({
+      query: () => ({
+        url: "LoginHistory/OSHelper",
+      }),
+      providesTags: ["LoginHistory", "User"],
+    }),
+    deviceHelper: builder.query<Global.helperList, void>({
+      query: () => ({
+        url: "LoginHistory/DeviceHelper",
+      }),
+      providesTags: ["LoginHistory", "User"],
+    }),
   }),
 });
 
-export const { useGetLoginHistoriesQuery } = loginHistoryApi;
+export const {
+  useGetLoginHistoriesQuery,
+  useBrowserHelperQuery,
+  useDeviceHelperQuery,
+  useOsHelperQuery,
+} = loginHistoryApi;

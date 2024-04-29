@@ -1,5 +1,9 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useGetLoginHistoriesQuery } from "../redux/api/loginHistory";
+import {
+  useBrowserHelperQuery,
+  useGetLoginHistoriesQuery,
+  useOsHelperQuery,
+} from "../redux/api/loginHistory";
 import { useUsersWithNamesQuery } from "../redux/api/userApi";
 import { useAppSelector } from "../redux/hooks";
 import {
@@ -23,6 +27,9 @@ function LoginHistories() {
   });
 
   const { data: userDD } = useUsersWithNamesQuery();
+  const { data: osDD } = useOsHelperQuery();
+  const { data: browserDD } = useBrowserHelperQuery();
+  console.log(browserDD);
 
   const userRole = useAppSelector((state) => state.auth.userData?.role);
 
@@ -79,7 +86,7 @@ function LoginHistories() {
           <div className="container-fluid">
             <div className="row mb-2">
               <div className="col-sm-6">
-                <h1>Users</h1>
+                <h1>Login Histories</h1>
               </div>
             </div>
           </div>
@@ -88,12 +95,11 @@ function LoginHistories() {
         {/* Main content */}
         <section className="content">
           <div className="card">
-            <div className="card-header"></div>
             {/* /.card-header */}
             <div className="card-body">
               <Table {...pageInfo}>
                 <Grid container spacing={2} paddingBottom={2}>
-                  {userRole !== "User" && (
+                  {/* {userRole !== "User" && (
                     <Grid item xs={6} md={3}>
                       <AutoCompleteField
                         options={userDD?.data || []}
@@ -101,14 +107,28 @@ function LoginHistories() {
                         multiple
                       />
                     </Grid>
-                  )}
-                  <Grid item xs={6} md={3}>
+                  )} */}
+                  <Grid item xs={6} md={4} xl={2}>
                     <SearchField label="Search Text" placeholder="Enter text" />
                   </Grid>
-                  <Grid item xs={6} md={3}>
+                  <Grid item xs={6} md={4} xl={2}>
+                    <AutoCompleteField
+                      options={(browserDD && browserDD) || []}
+                      label="Browser"
+                      multiple
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={4} xl={2}>
+                    <AutoCompleteField
+                      options={(osDD && osDD) || []}
+                      label="Os"
+                      multiple
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={4} xl={2}>
                     <DatePickerField label="From" />
                   </Grid>
-                  <Grid item xs={6} md={3}>
+                  <Grid item xs={6} md={4} xl={2}>
                     <DatePickerField to label="To" />
                   </Grid>
                 </Grid>
