@@ -1,7 +1,9 @@
+import { useAppSelector } from "../redux/hooks";
 import { routerHelper } from "../routes/RouterHelper";
 import { NavLink } from "react-router-dom";
 
 function SideBar() {
+  const userRole = useAppSelector((state) => state.auth.userData?.role);
   return (
     <aside className="main-sidebar sidebar-dark-primary elevation-4">
       {/* Brand Logo */}
@@ -27,19 +29,21 @@ function SideBar() {
             {/* Add icons to the links using the .nav-icon class
          with font-awesome or any other icon font library */}
 
-            {routerHelper.map((route) => (
-              <li key={route.path} className="nav-item">
-                <NavLink
-                  to={route.path}
-                  className={({ isActive }) =>
-                    `nav-link ${isActive && "active"}`
-                  }
-                >
-                  <i className={`nav-icon fa ${route.iconClass}`} />
-                  <p>{route.name}</p>
-                </NavLink>
-              </li>
-            ))}
+            {routerHelper
+              .filter((route) => route.roles?.includes(userRole))
+              .map((route) => (
+                <li key={route.path} className="nav-item">
+                  <NavLink
+                    to={route.path}
+                    className={({ isActive }) =>
+                      `nav-link ${isActive && "active"}`
+                    }
+                  >
+                    <i className={`nav-icon fa ${route.iconClass}`} />
+                    <p>{route.name}</p>
+                  </NavLink>
+                </li>
+              ))}
           </ul>
         </nav>
         {/* /.sidebar-menu */}

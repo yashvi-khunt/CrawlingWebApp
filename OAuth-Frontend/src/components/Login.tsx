@@ -1,11 +1,58 @@
 import { useForm } from "react-hook-form";
+import GoogleAuthButton from "./GoogleAuthButton";
+import { useGoogleLoginMutation, useLoginMutation } from "../redux/api/authApi";
+import { useEffect, useState } from "react";
+import { useAppDispatch } from "../redux/hooks";
+import { login } from "../redux/slice/authSlice";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const { handleSubmit, register } = useForm();
+  const [googleLogin, { data: apisuccess, error: apiError }] =
+    useGoogleLoginMutation();
+  const [loginApi, { data: loginResponse, error: loginError }] =
+    useLoginMutation();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const [error, setError] = useState(null);
 
   const onSubmit = (data) => {
-    console.log(data);
+    loginApi(data as authTypes.loginRegisterParams);
   };
+
+  useEffect(() => {
+    setError(loginError?.data.message);
+  }, [loginError]);
+
+  useEffect(() => {
+    if (loginResponse?.success) {
+      dispatch(login(loginResponse.data));
+      navigate("/");
+    }
+  }, [loginResponse]);
+  const clearError = () => {
+    setError(null);
+  };
+
+  const handleSuccess = (response) => {
+    console.log(response);
+    googleLogin({ token: response.credential });
+  };
+  const handleFailure = (response) => {
+    console.log(response);
+  };
+
+  useEffect(() => {
+    console.log(apisuccess);
+    if (apisuccess?.status) {
+      dispatch(login(apisuccess?.data?.token));
+      navigate("/");
+    }
+  }, [apisuccess?.data]);
+
+  useEffect(() => {
+    console.log(apiError);
+  }, [apiError]);
 
   return (
     <div className="hold-transition login-page">
@@ -74,10 +121,10 @@ function Login() {
               </div>
             </form>
             <div className="social-auth-links text-center mt-2 mb-3">
-              <a href="#" className="btn btn-block btn-danger">
-                <i className="fa fa-brands fa-google mr-2" /> Sign in using
-                Google
-              </a>
+              <GoogleAuthButton
+                onSuccess={handleSuccess}
+                onFailure={handleFailure}
+              />
             </div>
             <p className="mb-1">
               <a href="forgot-password.html">I forgot my password</a>

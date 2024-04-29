@@ -42,23 +42,21 @@ const AppRouter = () => {
   //   }
 
   const filterRoute = (routeArray: Global.RouteConfig) => {
-    return (
-      routeArray
-        //.filter((route) => route.roles?.includes(userRole))
-        .map((route) => {
-          return (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={route.element || <Outlet />}
-            >
-              {route.children && route.children.length > 0
-                ? filterRoute(route.children)
-                : null}
-            </Route>
-          );
-        })
-    );
+    return routeArray
+      .filter((route) => route.roles?.includes(userRole))
+      .map((route) => {
+        return (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={route.element || <Outlet />}
+          >
+            {route.children && route.children.length > 0
+              ? filterRoute(route.children)
+              : null}
+          </Route>
+        );
+      });
   };
 
   const routes = createRoutesFromElements(

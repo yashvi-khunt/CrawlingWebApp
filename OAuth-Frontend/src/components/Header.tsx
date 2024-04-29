@@ -1,5 +1,18 @@
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { logout } from "../redux/slice/authSlice";
+
 function Header() {
-  const handleLogout = () => {};
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const userData = useAppSelector((state) => state.auth.userData);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/auth/login");
+    location.reload();
+  };
   return (
     <div>
       <nav className="main-header navbar-expand navbar-white navbar-light">
@@ -29,7 +42,7 @@ function Header() {
                   alt="User Image"
                 />
               </div>
-              <div className="info">Alexender Peirce</div>
+              <div className="info">{userData?.email}</div>
             </a>
             <div className="dropdown-menu dropdown-menu-right">
               <a href="/profile" className="dropdown-item">

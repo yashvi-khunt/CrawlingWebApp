@@ -1,8 +1,11 @@
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using OAuthLogin.BLL.Mapper;
 using OAuthLogin.BLL.Repositories;
 using OAuthLogin.BLL.Services;
@@ -23,7 +26,34 @@ namespace OAuthLogin
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+
+                var securityScheme = new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Description = "JWT Authorization header using the Bearer scheme",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                };
+
+                c.AddSecurityDefinition("Bearer", securityScheme);
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement{
+                    {
+                        securityScheme,
+                        Array.Empty<string>()
+                    }
+                });
+            });
+
 
 
             builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -37,25 +67,41 @@ namespace OAuthLogin
             .AddDefaultTokenProviders();
 
             //Email Configuration
+            builder.Services.Configure<GoogleAuthConfig>(builder.Configuration.GetSection("Google"));
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
             builder.Services.AddTransient<IEmailService, EmailService>();
             //  builder.Services.AddTransient<IAuthService, AuthService>();
             builder.Services.AddTransient<IProcedureManager, ProcedureManager>();
             builder.Services.AddTransient<ILoginHistoryService, LoginHistoryService>();
-
+            builder.Services.AddTransient<IGoogleAuthService, GoogleAuthService>();
 
 
             builder.Services.AddAuthentication(options =>
             {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-.AddCookie().AddGoogle(googleOptions =>
+
+                        // Adding Jwt Bearer
+                        .AddJwtBearer(options =>
+                        {
+                            options.SaveToken = true;
+                            options.RequireHttpsMetadata = false;
+                            options.TokenValidationParameters = new TokenValidationParameters()
+                            {
+                                ValidateIssuer = true,
+                                ValidateAudience = true,
+                                ValidAudience = builder.Configuration["JWT:ValidAudience"],
+                                ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+                                IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+                            };
+                        }).AddGoogle(googleOptions =>
             {
                 googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
                 googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
                 googleOptions.SignInScheme = IdentityConstants.ExternalScheme;
-            });
+            }); 
 
 
             builder.Services.Configure<IdentityOptions>(options =>

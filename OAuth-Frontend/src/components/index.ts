@@ -15,3 +15,6 @@ export { default as LoginHistories } from "./LoginHistories";
 export { default as SendEmail } from "./SendEmail";
 export { default as SetPassword } from "./SetPassword";
 export { default as Users } from "./Users";
+export { default as FormAutoCompleteField } from "./FormAutoCompleteField";
+export { default as FormInputText } from "./FormInputText";
+export { default as FormInputPassword } from "./FormPasswordField";

@@ -15,7 +15,7 @@ const Layout = () => {
       if (location.pathname === "/") {
         navigate("/profile");
       } else {
-        navigate(location.pathname);
+        navigate(location.pathname + location.search);
       }
     } else {
       navigate("/auth/login");

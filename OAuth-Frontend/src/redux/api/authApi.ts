@@ -7,7 +7,7 @@ export const authApi = indexApi.injectEndpoints({
       authTypes.loginRegisterParams
     >({
       query: (data) => ({
-        url: "Auth/login",
+        url: "Auth/Login",
         method: "POST",
         body: data,
       }),
@@ -18,7 +18,7 @@ export const authApi = indexApi.injectEndpoints({
       authTypes.loginRegisterParams
     >({
       query: (data) => ({
-        url: "Auth/register",
+        url: "Auth/Register",
         method: "POST",
         body: data,
       }),
@@ -29,7 +29,7 @@ export const authApi = indexApi.injectEndpoints({
       authTypes.confirmEmailParams
     >({
       query: ({ id, token }) => ({
-        url: `Auth/confirmUserEmail?UserId=${id}&Token=${token}`,
+        url: `Auth/ConfirmUserEmail?UserId=${id}&Token=${token}`,
         method: "GET",
       }),
       providesTags: ["User"],
@@ -39,7 +39,7 @@ export const authApi = indexApi.injectEndpoints({
       authTypes.forgotPasswordParams
     >({
       query: (data) => ({
-        url: "Auth/forgot-password",
+        url: "Auth/ForgotPassword",
         method: "POST",
         body: data,
       }),
@@ -50,8 +50,16 @@ export const authApi = indexApi.injectEndpoints({
       authTypes.resetPasswordParams
     >({
       query: (data) => ({
-        url: `Auth/reset-password`,
+        url: `Auth/ResetPassword`,
         method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["User"],
+    }),
+    googleLogin: builder.mutation<unknown, { token: string }>({
+      query: (data) => ({
+        url: "Auth/GoogleSignIn",
+        method: "Post",
         body: data,
       }),
       invalidatesTags: ["User"],
@@ -65,4 +73,5 @@ export const {
   useForgotPasswordMutation,
   useResetPasswordMutation,
   useRegisterMutation,
+  useGoogleLoginMutation,
 } = authApi;

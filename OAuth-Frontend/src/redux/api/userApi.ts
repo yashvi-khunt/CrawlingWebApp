@@ -4,7 +4,7 @@ export const userApi = indexApi.injectEndpoints({
   endpoints: (builder) => ({
     userDetails: builder.query<authTypes.userDetails, string | null>({
       query: (data) => ({
-        url: `User/details${
+        url: `User/Details${
           data === "" || data === null ? "" : `?email=${data}`
         }`,
         method: "GET",
@@ -16,7 +16,7 @@ export const userApi = indexApi.injectEndpoints({
       authTypes.loginRegisterParams
     >({
       query: (data) => ({
-        url: "User/change-password",
+        url: "User/ChangePassword",
         method: "PUT",
         body: data,
       }),
@@ -37,7 +37,7 @@ export const userApi = indexApi.injectEndpoints({
       authTypes.updateUserProps
     >({
       query: (data) => ({
-        url: `User/edit`,
+        url: `User/Edit`,
         method: "PUT",
         body: data,
       }),
@@ -48,7 +48,7 @@ export const userApi = indexApi.injectEndpoints({
       authTypes.forgotPasswordParams
     >({
       query: (data) => ({
-        url: "User/add-user",
+        url: "User/AddUser",
         method: "POST",
         body: data,
       }),
@@ -56,7 +56,7 @@ export const userApi = indexApi.injectEndpoints({
     }),
     toggleUser: builder.mutation<authTypes.apiResponse, string>({
       query: (data) => ({
-        url: `User/toggle-user-state/${data}`,
+        url: `User/ToggleUserState/${data}`,
         method: "PUT",
       }),
       invalidatesTags: ["User"],

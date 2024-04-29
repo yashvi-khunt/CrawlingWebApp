@@ -30,7 +30,9 @@ namespace OAuthLogin.BLL.Services
 
         public Task<VMAddLoginHistoryResponse> AddLoginHistory(VMAddLoginHistory vMAddLoginHistory)
         {
-            throw new NotImplementedException();
+            var loginHistory = _procedureManager.ExecStoreProcedure<VMAddLoginHistoryResponse>(StoredProcedure.AddLoginHistory, vMAddLoginHistory);
+
+            return Task.FromResult(loginHistory[0]);
         }
 
         public Task<VMGetLoginHistories> GetAllLoginHistories(VMGetHistoriesInput vMGetHistoriesInput)

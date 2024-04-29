@@ -10,9 +10,8 @@ using System.Text;
 using OAuthLogin.DAL.Models;
 using UAParser;
 using OAuthLogin.BLL.Helpers;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 
 namespace LoginSystem.Controllers
 {
@@ -23,40 +22,112 @@ namespace LoginSystem.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-       
+        private readonly OAuthDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
+        private readonly GoogleAuthConfig _googleAuthConfig;
         private readonly ILoginHistoryService _loginHistoryService;
+        private readonly IGoogleAuthService _googleAuthService;
 
-        public AuthController(UserManager<ApplicationUser> userManager,RoleManager<IdentityRole> roleManager, IConfiguration configuration, IEmailService service, ILoginHistoryService loginHistoryService)
+        public AuthController(
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager, IConfiguration configuration, IEmailService service, ILoginHistoryService loginHistoryService, IOptions<GoogleAuthConfig> googleAuthConfig, OAuthDbContext context, IGoogleAuthService googleAuthService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
             _emailService = service;
+            _googleAuthConfig = googleAuthConfig.Value;
             _loginHistoryService = loginHistoryService;
+            _context = context;
+            _googleAuthService = googleAuthService;
         }
 
-        [HttpGet("login")]
-        public IActionResult Login()
+        protected IActionResult ReturnResponse(dynamic model)
         {
-            var props = new AuthenticationProperties { RedirectUri = "https://www.google.com" };
-            return Challenge(props, GoogleDefaults.AuthenticationScheme);
+            if (model.Status == RequestExecution.Successful)
+            {
+                return Ok(model);
+            }
+
+            return BadRequest(model);
         }
-        [HttpGet("signin-google")]
-        public async Task<IActionResult> GoogleLogin()
+
+        protected IActionResult HandleError(Exception ex, string customErrorMessage = null)
         {
-            var response = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            if (response.Principal == null) return BadRequest();
+           
 
-            var name = response.Principal.FindFirstValue(ClaimTypes.Name);
-            var givenName = response.Principal.FindFirstValue(ClaimTypes.GivenName);
-            var email = response.Principal.FindFirstValue(ClaimTypes.Email);
-            //Do something with the claims
-            // var user = await UserService.FindOrCreate(new { name, givenName, email});
-
-            return Ok();
+            BaseResponse<string> rsp = new BaseResponse<string>();
+            rsp.Status = RequestExecution.Error;
+#if DEBUG
+            rsp.Errors = new List<string>() { $"Error: {(ex?.InnerException?.Message ?? ex.Message)} --> {ex?.StackTrace}" };
+            return BadRequest(rsp);
+#else
+             rsp.Errors = new List<string>() { "An error occurred while processing your request!"};
+             return BadRequest(rsp);
+#endif
         }
+
+        [HttpPost]
+        [Route("GoogleSignIn")]
+        public async Task<IActionResult> GoogleLogin([FromBody] VMGoogleSignin model)
+        {
+            try
+            {
+                var response = await _googleAuthService.GoogleSignIn(model);
+
+                if (response.Errors.Any())
+                    return ReturnResponse(new BaseResponse<VMGoogleSignin>(response.ResponseMessage, response.Errors));
+
+                var userRole = await _userManager.GetRolesAsync(response.Data);
+                //var jwtResponse = CreateJwtToken(response.Data);
+                var jwtResponse = GenerateJwtToken(response.Data, userRole);
+
+                var data = new VMGoogleSignin
+                {
+                    Token = jwtResponse,
+                };
+
+                var user = await _userManager.FindByEmailAsync(response.Data.Email);
+                var ipAddress = HttpContext.Connection.RemoteIpAddress.ToString();
+
+                // Parse User-Agent header to get browser, OS, and device details
+                var userAgent = Request.Headers["User-Agent"].ToString();
+                var uaParser = Parser.GetDefault();
+                ClientInfo clientInfo = uaParser.Parse(userAgent);
+
+                var browser = clientInfo.UserAgent.Family;
+                var operatingSystem = clientInfo.OS.Family;
+                var device = clientInfo.Device.Family;
+
+                VMAddLoginHistory vMAddLoginHistory = new VMAddLoginHistory
+                {
+                    UserId = user.Id,
+                    IpAddress = ipAddress,
+                    Browser = browser ?? "",
+                    DateTime = DateTime.Now,
+                    Device = device == "Other" || device is null ? "" : device,
+                    OS = operatingSystem ?? "",
+
+                };
+
+                var lresponse = await _loginHistoryService.AddLoginHistory(vMAddLoginHistory);
+                if (lresponse != null && lresponse.IsValid == true)
+                {
+                    // Return a successful response with the generated token and its expiration
+                    return ReturnResponse(new BaseResponse<VMGoogleSignin>(data));
+                }
+
+
+                return ReturnResponse(new BaseResponse<VMGoogleSignin>(data));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new Response(ex.Message, false));
+            }
+        }
+
+
 
         [HttpPost]
         [Route("Login")]
@@ -70,7 +141,6 @@ namespace LoginSystem.Controllers
             {
                 return StatusCode(StatusCodes.Status401Unauthorized, new Response("Username or Password is incorrect", false));
             }
-            var userRole = await _userManager.GetRolesAsync(user);
 
             if (!user.EmailConfirmed)
             {
@@ -78,27 +148,17 @@ namespace LoginSystem.Controllers
                 return StatusCode(StatusCodes.Status403Forbidden, new Response("Email is not confirmed. Please confirm your email before signing in.", false));
             }
 
-            if(!user.IsActivated)
+            if (!user.IsActivated)
             {
                 return StatusCode(StatusCodes.Status403Forbidden, new Response("User not active. Please contact admin.", false));
             }
 
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-
-                var authClaims = new List<Claim> {
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                   new Claim(ClaimTypes.NameIdentifier, user.Id),
-                };
-
-                foreach (var role in userRole)
-                {
-                    authClaims.Add(new Claim(ClaimTypes.Role, role));
-                }
+            var userRole = await _userManager.GetRolesAsync(user);
 
                 // Create a JWT token
-                var token = GenerateJwtToken(user, authClaims);
+                var token = GenerateJwtToken(user,userRole);
 
                 // Get IP address from the request
                 var ipAddress = HttpContext.Connection.RemoteIpAddress.ToString();
@@ -123,12 +183,12 @@ namespace LoginSystem.Controllers
 
                 };
 
-                //var response = await _loginHistoryService.AddLoginHistory(vMAddLoginHistory);
-                //if (response != null && response.IsValid == true)
-                //{
-                //    // Return a successful response with the generated token and its expiration
-                //    return StatusCode(200, new Response<string>(token, true, "Logged in successfully!"));
-                //}
+                var response = await _loginHistoryService.AddLoginHistory(vMAddLoginHistory);
+                if (response != null && response.IsValid == true)
+                {
+                    // Return a successful response with the generated token and its expiration
+                    return StatusCode(200, new Response<string>(token, true, "Logged in successfully!"));
+                }
 
                 //Return a successful response with the generated token and its expiration
                 return StatusCode(200, new Response<string>(token, true, "Logged in successfully! But could not save login history."));
@@ -174,7 +234,7 @@ namespace LoginSystem.Controllers
 
             try
             {
-                
+
                 await _userManager.AddToRoleAsync(user, "User");
 
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -306,11 +366,22 @@ namespace LoginSystem.Controllers
 
         }
 
+        
 
 
+        private string GenerateJwtToken(ApplicationUser user, IList<string> userRole)
+        { 
+             var authClaims = new List<Claim> {
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                   new Claim(ClaimTypes.NameIdentifier, user.Id),
+                };
 
-        private string GenerateJwtToken(ApplicationUser user, List<Claim> claims)
-        {
+                foreach (var role in userRole)
+                {
+                    authClaims.Add(new Claim(ClaimTypes.Role, role));
+                }
+        
             // Get the JWT secret key and token validity duration from configuration
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
 
@@ -318,7 +389,7 @@ namespace LoginSystem.Controllers
                 issuer: _configuration["JWT:ValidIssuer"],
                 audience: _configuration["JWT:ValidAudience"],
                 expires: DateTime.Now.AddMinutes(Convert.ToDouble(_configuration["JWT:TokenValidityInMinutes"])),
-                claims: claims,
+                claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
             );
 

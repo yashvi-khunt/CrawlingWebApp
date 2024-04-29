@@ -1,13 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { useForgotPasswordMutation } from "../redux/api/authApi";
+import { useAppDispatch } from "../redux/hooks";
+import { openSnackbar } from "../redux/slice/snackbarSlice";
 
 function ForgotPassword() {
-  const { register, handleSubmit, errors } = useForm();
+  const { handleSubmit, register, control } = useForm();
+  const navigate = useNavigate();
+  const [edata, setData] = useState<authTypes.forgotPasswordParams>({
+    email: "",
+  });
 
-  const onSubmit = (data) => {
-    // Handle form submission here
-    console.log(data);
+  const [forgotPasswordApi, { data, error }] = useForgotPasswordMutation();
+  const dispatch = useAppDispatch();
+
+  const onSubmit = (data: unknown) => {
+    //console.log(data as authTypes.forgotPasswordParams);
+    setData(data as authTypes.forgotPasswordParams);
+    forgotPasswordApi(data as authTypes.forgotPasswordParams);
   };
+
+  useEffect(() => {
+    if (data?.success) navigate(`/sent-password-email/${edata.email}`);
+  }, [data?.data]);
+
+  useEffect(() => {
+    // console.log(error?.data.message);
+    if (error?.data && !error?.success)
+      dispatch(
+        openSnackbar({
+          severity: "error",
+          message: error?.data.message,
+        })
+      );
+  }, [error?.data]);
 
   return (
     <div className="hold-transition login-page">
@@ -46,8 +73,8 @@ function ForgotPassword() {
                   </div>
                 </div>
               </div>
-              {errors.email && (
-                <div className="invalid-feedback">{errors.email.message}</div>
+              {error?.email && (
+                <div className="invalid-feedback">{error.email?.message}</div>
               )}
               <div className="row">
                 <div className="col-12">
