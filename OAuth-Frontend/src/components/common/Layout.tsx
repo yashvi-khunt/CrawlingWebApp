@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Header, SideBar } from "./index";
-import { useAppSelector } from "../redux/hooks";
+import { Header, SideBar } from "../index";
+import { useAppSelector } from "../../redux/hooks";
 import { useEffect } from "react";
 
 const Layout = () => {

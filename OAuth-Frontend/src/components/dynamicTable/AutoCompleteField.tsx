@@ -83,15 +83,15 @@ const AutoCompleteField = ({
         <TextField
           {...params}
           label={
-            newLabel === "Statuss"
-              ? "Status"
+            newLabel === "Oss"
+              ? "OS"
               : newLabel === "LeaveTypes"
               ? "Leave Types"
               : newLabel
           }
           placeholder={`Select ${
-            newLabel === "Statuss"
-              ? "Status"
+            newLabel === "Oss"
+              ? "OS"
               : newLabel === "LeaveTypes"
               ? "Leave Types"
               : newLabel

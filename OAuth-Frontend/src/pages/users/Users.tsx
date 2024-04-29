@@ -4,13 +4,13 @@ import {
   useGetUserListQuery,
   useToggleUserMutation,
   useUsersWithNamesQuery,
-} from "../redux/api/userApi";
-import { useAppDispatch, useAppSelector } from "../redux/hooks";
-import AutoCompleteField from "./dynamicTable/AutoCompleteField";
-import DatePickerField from "./dynamicTable/DatePickerField";
-import Table from "./dynamicTable/DynamicTable";
-import SearchField from "./dynamicTable/SearchField";
-import StatusComponent from "./dynamicTable/StatusComponent";
+} from "../../redux/api/userApi";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import AutoCompleteField from "../../components/dynamicTable/AutoCompleteField";
+import DatePickerField from "../../components/dynamicTable/DatePickerField";
+import Table from "../../components/dynamicTable/DynamicTable";
+import SearchField from "../../components/dynamicTable/SearchField";
+import StatusComponent from "../../components/dynamicTable/StatusComponent";
 import {
   GridActionsCellItem,
   GridColDef,
@@ -20,7 +20,7 @@ import {
 } from "@mui/x-data-grid";
 import { Edit, InfoOutlined, Person, PersonOff } from "@mui/icons-material";
 import { useEffect } from "react";
-import { openSnackbar } from "../redux/slice/snackbarSlice";
+import { openSnackbar } from "../../redux/slice/snackbarSlice";
 import dayjs from "dayjs";
 
 function Users() {

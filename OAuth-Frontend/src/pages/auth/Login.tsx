@@ -1,9 +1,12 @@
 import { useForm } from "react-hook-form";
-import GoogleAuthButton from "./GoogleAuthButton";
-import { useGoogleLoginMutation, useLoginMutation } from "../redux/api/authApi";
+import GoogleAuthButton from "../../components/GoogleAuthButton";
+import {
+  useGoogleLoginMutation,
+  useLoginMutation,
+} from "../../redux/api/authApi";
 import { useEffect, useState } from "react";
-import { useAppDispatch } from "../redux/hooks";
-import { login } from "../redux/slice/authSlice";
+import { useAppDispatch } from "../../redux/hooks";
+import { login } from "../../redux/slice/authSlice";
 import { useNavigate } from "react-router-dom";
 import { Grid } from "@mui/material";
 

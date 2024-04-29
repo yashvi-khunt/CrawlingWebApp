@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useForgotPasswordMutation } from "../redux/api/authApi";
-import { useAppDispatch } from "../redux/hooks";
-import { openSnackbar } from "../redux/slice/snackbarSlice";
+import { useForgotPasswordMutation } from "../../redux/api/authApi";
+import { useAppDispatch } from "../../redux/hooks";
+import { openSnackbar } from "../../redux/slice/snackbarSlice";
 
 function ForgotPassword() {
   const { handleSubmit, register, control } = useForm();

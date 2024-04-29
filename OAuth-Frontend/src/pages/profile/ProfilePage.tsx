@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useUserDetailsQuery } from "../redux/api/userApi";
+import { useUserDetailsQuery } from "../../redux/api/userApi";
 
 function ProfilePage() {
   const [userEmail, setUserEmail] = useState<null | string>(null);
@@ -16,21 +16,14 @@ function ProfilePage() {
     }
   }, []);
   return (
-    <div>
+    <div className="content-wrapper">
       <section className="content-header">
         <div className="container-fluid">
           <div className="row mb-2">
             <div className="col-sm-6">
               <h1>Profile</h1>
             </div>
-            <div className="col-sm-6">
-              <ol className="breadcrumb float-sm-right">
-                <li className="breadcrumb-item">
-                  <a href="#">Home</a>
-                </li>
-                <li className="breadcrumb-item active">User Profile</li>
-              </ol>
-            </div>
+            <div className="col-sm-6">{/* Edit button */}</div>
           </div>
         </div>
         {/* /.container-fluid */}

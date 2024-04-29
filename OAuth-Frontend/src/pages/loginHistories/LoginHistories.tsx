@@ -3,9 +3,9 @@ import {
   useBrowserHelperQuery,
   useGetLoginHistoriesQuery,
   useOsHelperQuery,
-} from "../redux/api/loginHistory";
-import { useUsersWithNamesQuery } from "../redux/api/userApi";
-import { useAppSelector } from "../redux/hooks";
+} from "../../redux/api/loginHistory";
+import { useUsersWithNamesQuery } from "../../redux/api/userApi";
+import { useAppSelector } from "../../redux/hooks";
 import {
   GridActionsCellItem,
   GridColDef,
@@ -14,10 +14,10 @@ import {
 } from "@mui/x-data-grid";
 import { Box, Button, Container, Grid, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import AutoCompleteField from "./dynamicTable/AutoCompleteField";
-import DatePickerField from "./dynamicTable/DatePickerField";
-import Table from "./dynamicTable/DynamicTable";
-import SearchField from "./dynamicTable/SearchField";
+import AutoCompleteField from "../../components/dynamicTable/AutoCompleteField";
+import DatePickerField from "../../components/dynamicTable/DatePickerField";
+import Table from "../../components/dynamicTable/DynamicTable";
+import SearchField from "../../components/dynamicTable/SearchField";
 
 function LoginHistories() {
   const [searchParams] = useSearchParams();

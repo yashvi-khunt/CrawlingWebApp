@@ -1,5 +1,5 @@
-import { useAppSelector } from "../redux/hooks";
-import { routerHelper } from "../routes/RouterHelper";
+import { useAppSelector } from "../../redux/hooks";
+import { routerHelper } from "../../routes/RouterHelper";
 import { NavLink } from "react-router-dom";
 
 function SideBar() {

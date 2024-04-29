@@ -92,7 +92,7 @@ function SetPassword() {
               <div className="row">
                 <div className="col-12">
                   <button type="submit" className="btn btn-primary btn-block">
-                    Change password
+                    Set password
                   </button>
                 </div>
               </div>

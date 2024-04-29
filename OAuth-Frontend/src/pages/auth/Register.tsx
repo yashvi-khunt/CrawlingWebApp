@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import GoogleAuthButton from "./GoogleAuthButton";
+import GoogleAuthButton from "../../components/GoogleAuthButton";
 import {
   useGoogleLoginMutation,
   useRegisterMutation,
-} from "../redux/api/authApi";
+} from "../../redux/api/authApi";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { login } from "../redux/slice/authSlice";
+import { login } from "../../redux/slice/authSlice";
 
 function Register() {
   const {
