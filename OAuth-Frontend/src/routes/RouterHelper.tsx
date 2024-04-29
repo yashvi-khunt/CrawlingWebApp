@@ -1,19 +1,19 @@
+import { Login } from "@mui/icons-material";
 import {
-  AddUser,
-  ChangePassword,
-  EditUser,
-  EmailConfirmSuccess,
-  ForgotPassword,
-  Login,
-  LoginHistories,
-  ProfileEdit,
   ProfilePage,
-  Register,
-  ResetPassword,
-  SendEmail,
-  SetPassword,
+  ProfileEdit,
+  ChangePassword,
   Users,
-} from "../components";
+  AddUser,
+  EditUser,
+  LoginHistories,
+  Register,
+  ForgotPassword,
+  ResetPassword,
+  SetPassword,
+  EmailConfirmSuccess,
+  SendEmail,
+} from "../pages";
 
 export const routerHelper: Global.RouteConfig = [
   {

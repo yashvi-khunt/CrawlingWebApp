@@ -34,6 +34,7 @@ function Login() {
       navigate("/");
     }
   }, [loginResponse]);
+
   const clearError = () => {
     setError(null);
   };

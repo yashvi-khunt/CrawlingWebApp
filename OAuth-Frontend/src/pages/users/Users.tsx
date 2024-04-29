@@ -159,7 +159,12 @@ function Users() {
                 <h1>Users</h1>
               </div>
               <div className="col-sm-6">
-                <button className="btn btn-primary float-sm-right">
+                <button
+                  onClick={() => {
+                    navigate("/users/add");
+                  }}
+                  className="btn btn-primary float-sm-right"
+                >
                   Add User
                 </button>
               </div>

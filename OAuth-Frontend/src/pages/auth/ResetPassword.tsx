@@ -1,15 +1,48 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useResetPasswordMutation } from "../../redux/api/authApi";
+import { useAppDispatch } from "../../redux/hooks";
+import { openSnackbar } from "../../redux/slice/snackbarSlice";
 
 function ResetPassword() {
-  const { register, handleSubmit, errors, watch } = useForm();
-  const password = React.useRef({});
-  password.current = watch("password", "");
+  const {
+    handleSubmit,
+    register,
+    watch,
+    formState: { errors },
+  } = useForm();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const [resetApi, { data, error }] = useResetPasswordMutation();
+  const [searchParams] = useSearchParams();
 
-  const onSubmit = (data) => {
-    // Handle form submission here
+  const onSubmit = (data: unknown) => {
     console.log(data);
+    resetApi({
+      newPassword: data.password,
+      email: searchParams.get("userEmail"),
+      token: searchParams.get("token")?.split(" ").join("+"),
+    } as authTypes.resetPasswordParams);
   };
+
+  useEffect(() => {
+    if (data?.success) {
+      dispatch(
+        openSnackbar({
+          severity: "success",
+          message: data.message,
+        })
+      );
+      navigate("/auth/login");
+    }
+    if (error?.data && !error?.data.success) {
+      console.log("he");
+      dispatch(
+        openSnackbar({ severity: "error", message: error?.data.message })
+      );
+    }
+  }, [data?.data, error?.data]);
 
   return (
     <div className="hold-transition login-page">
@@ -50,9 +83,9 @@ function ResetPassword() {
                   </div>
                 </div>
               </div>
-              {errors.password && (
+              {errors?.password && (
                 <div className="invalid-feedback">
-                  {errors.password.message}
+                  {errors?.password.message}
                 </div>
               )}
               <div className="input-group mb-3">
@@ -84,10 +117,8 @@ function ResetPassword() {
                   </div>
                 </div>
               </div>
-              {errors.confirmPassword && (
-                <div className="invalid-feedback">
-                  {errors.confirmPassword.message}
-                </div>
+              {errors?.root?.message && (
+                <div className="invalid-feedback">{errors?.root?.message}</div>
               )}
               <div className="row">
                 <div className="col-12">

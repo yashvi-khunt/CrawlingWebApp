@@ -1,16 +1,46 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useResetPasswordMutation } from "../../redux/api/authApi";
+import { useAppDispatch } from "../../redux/hooks";
 
 function SetPassword() {
-  const { register, handleSubmit, errors, watch } = useForm();
-  const password = React.useRef({});
-  password.current = watch("password", "");
+  const {
+    handleSubmit,
+    register,
+    watch,
+    control,
+    formState: { errors },
+  } = useForm();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const [resetApi, { data, error }] = useResetPasswordMutation();
+  const [searchParams] = useSearchParams();
 
-  const onSubmit = (data) => {
-    // Handle form submission here
-    console.log(data);
+  const onSubmit = (data: unknown) => {
+    resetApi({
+      newPassword: data.password,
+      email: searchParams.get("email"),
+      token: searchParams.get("pwd")?.split(" ").join("+"),
+    } as authTypes.resetPasswordParams);
   };
-
+  useEffect(() => {
+    if (data?.success) {
+      dispatch(
+        openSnackbar({
+          severity: "success",
+          message: data.message,
+        })
+      );
+      navigate("/auth/login");
+    }
+    if (error?.data && !error?.data.success) {
+      console.log("he");
+      dispatch(
+        openSnackbar({ severity: "error", message: error?.data.message })
+      );
+    }
+  }, [data?.data, error?.data]);
   return (
     <div className="hold-transition login-page">
       <div className="login-box">

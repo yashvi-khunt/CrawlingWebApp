@@ -8,6 +8,7 @@ import {
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../redux/slice/authSlice";
+import { Grid } from "@mui/material";
 
 function Register() {
   const {
@@ -147,6 +148,11 @@ function Register() {
                   </div>
                 </div>
               </div>
+              {error && (
+                <Grid item xs={12} textAlign="center" color="red">
+                  {error}
+                </Grid>
+              )}
               <div className="row">
                 <div className="col">
                   <button type="submit" className="btn btn-primary btn-block">

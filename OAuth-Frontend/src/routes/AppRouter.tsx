@@ -14,33 +14,6 @@ const AppRouter = () => {
   const dispatch = useAppDispatch();
   const userRole = useAppSelector((state) => state.auth.userData?.role);
 
-  //   const [isInitialized, setIsInitialized] = useState(false);
-  //   useEffect(() => {
-  //     const localData = localStorage.getItem("userData");
-  //     if (localData) {
-  //       const userData = JSON.parse(localData);
-  //       dispatch(login({ token: userData }));
-  //     }
-
-  //     setIsInitialized(true);
-  //   }, []);
-
-  //   if (!isInitialized) {
-  //     return (
-  //       <Container
-  //         maxWidth="lg"
-  //         sx={{
-  //           display: "flex",
-  //           justifyContent: "center",
-  //           alignItems: "center",
-  //           height: "100vh",
-  //         }}
-  //       >
-  //         <CircularProgress />
-  //       </Container>
-  //     );
-  //   }
-
   const filterRoute = (routeArray: Global.RouteConfig) => {
     return routeArray
       .filter((route) => route.roles?.includes(userRole))

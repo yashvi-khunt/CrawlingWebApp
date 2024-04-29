@@ -23,7 +23,17 @@ function ProfilePage() {
             <div className="col-sm-6">
               <h1>Profile</h1>
             </div>
-            <div className="col-sm-6">{/* Edit button */}</div>
+            <div className="col-sm-6">
+              {" "}
+              <button
+                onClick={() => {
+                  navigate("/profile/edit");
+                }}
+                className="btn btn-primary float-sm-right"
+              >
+                Edit Profile
+              </button>
+            </div>
           </div>
         </div>
         {/* /.container-fluid */}
