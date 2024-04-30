@@ -11,7 +11,11 @@ import { useNavigate } from "react-router-dom";
 import { Grid } from "@mui/material";
 
 function Login() {
-  const { handleSubmit, register } = useForm();
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm();
   const [googleLogin, { data: apisuccess, error: apiError }] =
     useGoogleLoginMutation();
   const [loginApi, { data: loginResponse, error: loginError }] =
@@ -70,7 +74,7 @@ function Login() {
           </div>
           <div className="card-body">
             <p className="login-box-msg">Sign in to start your session</p>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit)} onChange={clearError}>
               <div className="input-group mb-3">
                 <input
                   type="email"
@@ -92,6 +96,13 @@ function Login() {
                     <span className="fas fa-envelope" />
                   </div>
                 </div>
+                {errors.email && (
+                  <>
+                    <span className="error invalid-feedback">
+                      {errors.email.message}
+                    </span>
+                  </>
+                )}
               </div>
               <div className="input-group mb-3">
                 <input
@@ -116,6 +127,13 @@ function Login() {
                     <span className="fas fa-lock" />
                   </div>
                 </div>
+                {errors.password && (
+                  <>
+                    <span className="error invalid-feedback">
+                      {errors.password.message}
+                    </span>
+                  </>
+                )}
               </div>
               {error && (
                 <Grid

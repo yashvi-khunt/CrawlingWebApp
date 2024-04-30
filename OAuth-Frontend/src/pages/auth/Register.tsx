@@ -94,6 +94,13 @@ function Register() {
                     <span className="fas fa-envelope" />
                   </div>
                 </div>
+                {errors.email && (
+                  <>
+                    <span className="error invalid-feedback">
+                      {errors.email.message}
+                    </span>
+                  </>
+                )}
               </div>
               <div className="input-group mb-3">
                 <input
@@ -118,13 +125,20 @@ function Register() {
                     <span className="fas fa-lock" />
                   </div>
                 </div>
+                {errors.password && (
+                  <>
+                    <span className="error invalid-feedback">
+                      {errors.password.message}
+                    </span>
+                  </>
+                )}
               </div>
               <div className="input-group mb-3">
                 <input
                   type="password"
                   className="form-control"
                   placeholder="Retype password"
-                  {...register("confirm-password", {
+                  {...register("confirmPassword", {
                     required: {
                       value: true,
                       message: "Confirm Password field is required.",
@@ -147,6 +161,13 @@ function Register() {
                     <span className="fas fa-lock" />
                   </div>
                 </div>
+                {errors.confirmPassword && (
+                  <>
+                    <span className="error invalid-feedback">
+                      {errors.confirmPassword.message}
+                    </span>
+                  </>
+                )}
               </div>
               {error && (
                 <Grid item xs={12} textAlign="center" color="red">

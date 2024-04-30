@@ -32,6 +32,12 @@
       rel="stylesheet"
       href="/plugins/datatables-buttons/css/buttons.bootstrap4.min.css"
     />
+    <!-- Select2 -->
+    <link rel="stylesheet" href="../../plugins/select2/css/select2.min.css" />
+    <link
+      rel="stylesheet"
+      href="../../plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css"
+    />
     <!-- Theme style -->
     <link rel="stylesheet" href="/dist/css/adminlte.min.css" />
 
@@ -41,6 +47,7 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script src="/plugins/jquery/jquery.min.js"></script>
+
     <!-- jsGrid -->
     <!-- <script src="/plugins/jsgrid/demos/db.js"></script> -->
     <script src="/plugins/jsgrid/jsgrid.min.js"></script>
@@ -59,9 +66,17 @@
     <script src="/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
     <!-- Bootstrap -->
     <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Select2 -->
+    <script src="../../plugins/select2/js/select2.full.min.js"></script>
     <!-- AdminLTE App -->
 
     <!-- AdminLTE -->
     <script src="/dist/js/adminlte.js"></script>
+    <script>
+      $(function () {
+        //Initialize Select2 Elements
+        $(".select2").select2();
+      });
+    </script>
   </body>
 </html>

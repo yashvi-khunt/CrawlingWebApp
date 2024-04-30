@@ -6,7 +6,11 @@ import { useAppDispatch } from "../../redux/hooks";
 import { openSnackbar } from "../../redux/slice/snackbarSlice";
 
 function ForgotPassword() {
-  const { handleSubmit, register, control } = useForm();
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm();
   const navigate = useNavigate();
   const [edata, setData] = useState<authTypes.forgotPasswordParams>({
     email: "",
@@ -72,10 +76,14 @@ function ForgotPassword() {
                     <span className="fas fa-envelope" />
                   </div>
                 </div>
+                {errors.email && (
+                  <>
+                    <span className="error invalid-feedback">
+                      {errors.email.message}
+                    </span>
+                  </>
+                )}
               </div>
-              {error?.email && (
-                <div className="invalid-feedback">{error.email?.message}</div>
-              )}
               <div className="row">
                 <div className="col-12">
                   <button type="submit" className="btn btn-primary btn-block">

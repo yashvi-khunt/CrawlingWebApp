@@ -19,7 +19,14 @@ import { useEffect } from "react";
 import { openSnackbar } from "../../redux/slice/snackbarSlice";
 
 const ChangePassword = () => {
-  const { handleSubmit, register, control, watch, reset } = useForm();
+  const {
+    handleSubmit,
+    register,
+    control,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const userEmail = useAppSelector((state) => state.auth.userEmail);
@@ -54,100 +61,84 @@ const ChangePassword = () => {
 
   return (
     <div className="content-wrapper">
-      <Container maxWidth="xl">
-        <Box display="flex" gap={2} alignItems="center" mb={2}>
-          <IconButton onClick={() => navigate("/profile")}>
-            <KeyboardBackspace />
-          </IconButton>
-          <Typography variant="h5" ml={-2}>
-            Change Password
-          </Typography>
-        </Box>
-        <Container
-          sx={{
-            marginTop: 8,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: "100%",
-          }}
-          maxWidth="xs"
-        >
-          <Box
-            component="form"
-            noValidate
-            onSubmit={handleSubmit(onSubmit)}
-            sx={{ mt: 3 }}
-          >
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <FormInputPassword
-                  control={control}
-                  {...register("password", {
-                    required: {
-                      value: true,
-                      message: "Password field is required.",
-                    },
-                    pattern: {
-                      value:
-                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@+._-])[a-zA-Z@+._-\d]{8,}$/,
-                      message:
-                        "Password should have atleast one uppercase,one lowercase, one special character and should be of the minimum length 8.",
-                    },
-                  })}
-                  label="Password"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormInputPassword
-                  control={control}
-                  {...register("confirm-password", { required: true })}
-                  label="Confirm password"
-                  {...register("confirm-password", {
-                    required: {
-                      value: true,
-                      message: "Confirm Password field is required.",
-                    },
-                    pattern: {
-                      value:
-                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@+._-])[a-zA-Z@+._-\d]{8,}$/,
-                      message:
-                        "Password should have atleast one uppercase,one lowercase, one special character and should be of the minimum length 8.",
-                    },
-                    validate: (val: string) => {
-                      if (watch("password") != val) {
-                        return "Password and Confirm password should be same.";
-                      }
-                    },
-                  })}
-                />
-              </Grid>
-            </Grid>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2, bgcolor: "#7d56d4" }}
-            >
-              Change Password
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link
-                  href="/profile"
-                  sx={{ textDecoration: "none", color: "gray" }}
-                  variant="body2"
-                >
-                  <Box justifyContent="center" display="flex" gap={0.2}>
-                    <ArrowBack fontSize="small" color="inherit" /> Back to
-                    profile
-                  </Box>
-                </Link>
-              </Grid>
-            </Grid>
-          </Box>
-        </Container>
-      </Container>
+      <section className="content-header">
+        <div className="container-fluid">
+          <div className="row mb-2">
+            <div className="col-sm-6">
+              <h1>Change Password</h1>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="content">
+        <div className="card card-primary">
+          <div className="card-body">
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="row">
+                <div className="form-group col-12 col-md-6">
+                  <label htmlFor="password">Password</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="password"
+                    {...register("password", {
+                      required: "Password field is required.",
+                      pattern: {
+                        value:
+                          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@+._-])[a-zA-Z@+._-\d]{8,}$/,
+                        message:
+                          "Password should have atleast one uppercase,one lowercase, one special character and should be of the minimum length 8.",
+                      },
+                    })}
+                  />
+                  {errors.password && (
+                    <span className="error invalid-feedback">
+                      {errors.password.message}
+                    </span>
+                  )}
+                </div>
+                <div className="form-group col-12 col-md-6">
+                  <label htmlFor="confirm-password">Confirm Password</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="confirm-password"
+                    {...register("confirmPassword", {
+                      required: "Confirm Password field is required.",
+                      pattern: {
+                        value:
+                          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@+._-])[a-zA-Z@+._-\d]{8,}$/,
+                        message:
+                          "Password should have atleast one uppercase,one lowercase, one special character and should be of the minimum length 8.",
+                      },
+                      validate: (val) => {
+                        if (watch("password") !== val) {
+                          return "Password and Confirm password should be same.";
+                        }
+                      },
+                    })}
+                  />
+                  {errors.confirmPassword && (
+                    <span className="error invalid-feedback">
+                      {errors.confirmPassword.message}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {error && (
+                <div className="text-danger">{error?.data.message}</div>
+              )}
+
+              <button type="submit" className="btn btn-primary mt-3">
+                Change Password
+              </button>
+              <a href="/profile" className="btn btn-link mt-3">
+                <div className="d-flex align-items-center">Cancel</div>
+              </a>
+            </form>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

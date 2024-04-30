@@ -19,7 +19,7 @@ function EmailConfirmSuccess() {
   console.log(pwdToken, email);
   return (
     <div className="hold-transition lockscreen">
-      <div className="lockscreen-wrapper`~">
+      <div className="lockscreen-wrapper">
         <div className="lockscreen-logo">
           <a href="/">
             <b>Admin</b>LTE

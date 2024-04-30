@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useResetPasswordMutation } from "../../redux/api/authApi";
 import { useAppDispatch } from "../../redux/hooks";
+import { openSnackbar } from "../../redux/slice/snackbarSlice";
 
 function SetPassword() {
   const {
@@ -79,18 +80,21 @@ function SetPassword() {
                     <span className="fas fa-lock" />
                   </div>
                 </div>
+                {errors.password && (
+                  <>
+                    <span className="error invalid-feedback">
+                      {errors.password.message}
+                    </span>
+                  </>
+                )}
               </div>
-              {errors.password && (
-                <div className="invalid-feedback">
-                  {errors.password.message}
-                </div>
-              )}
+
               <div className="input-group mb-3">
                 <input
                   type="password"
                   className="form-control"
                   placeholder="Retype password"
-                  {...register("confirm-password", {
+                  {...register("confirmPassword", {
                     required: {
                       value: true,
                       message: "Confirm Password field is required.",
@@ -113,12 +117,14 @@ function SetPassword() {
                     <span className="fas fa-lock" />
                   </div>
                 </div>
+                {errors.confirmPassword && (
+                  <>
+                    <span className="error invalid-feedback">
+                      {errors.confirmPassword.message}
+                    </span>
+                  </>
+                )}
               </div>
-              {errors.confirmPassword && (
-                <div className="invalid-feedback">
-                  {errors.confirmPassword.message}
-                </div>
-              )}
               <div className="row">
                 <div className="col-12">
                   <button type="submit" className="btn btn-primary btn-block">

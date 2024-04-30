@@ -82,18 +82,21 @@ function ResetPassword() {
                     <span className="fas fa-lock" />
                   </div>
                 </div>
+                {errors.password && (
+                  <>
+                    <span className="error invalid-feedback">
+                      {errors.password.message}
+                    </span>
+                  </>
+                )}
               </div>
-              {errors?.password && (
-                <div className="invalid-feedback">
-                  {errors?.password.message}
-                </div>
-              )}
+
               <div className="input-group mb-3">
                 <input
                   type="password"
                   className="form-control"
                   placeholder="Retype password"
-                  {...register("confirm-password", {
+                  {...register("confirmPassword", {
                     required: {
                       value: true,
                       message: "Confirm Password field is required.",
@@ -116,10 +119,14 @@ function ResetPassword() {
                     <span className="fas fa-lock" />
                   </div>
                 </div>
+                {errors.confirmPassword && (
+                  <>
+                    <span className="error invalid-feedback">
+                      {errors.confirmPassword.message}
+                    </span>
+                  </>
+                )}
               </div>
-              {errors?.root?.message && (
-                <div className="invalid-feedback">{errors?.root?.message}</div>
-              )}
               <div className="row">
                 <div className="col-12">
                   <button type="submit" className="btn btn-primary btn-block">

@@ -7,3 +7,8 @@
   height: 100vh;
   display: flex;
 }
+
+.invalid-feedback {
+  display: block;
+  color: red;
+}

@@ -26,7 +26,11 @@ import FormAutoCompleteField from "../../components/form/FormAutoCompleteField";
 
 const EditUser = () => {
   const navigate = useNavigate();
-  const { handleSubmit, register, control } = useForm();
+  const {
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm();
 
   const { email } = useParams();
   const [editUserApi, { data, error }] = useEditUserMutation();
@@ -67,57 +71,62 @@ const EditUser = () => {
   return (
     <>
       <div className="content-wrapper">
-        <Container maxWidth="xl">
-          <Box display="flex" gap={2} alignItems="center" mb={2}>
-            <IconButton onClick={() => navigate("/users")}>
-              <KeyboardBackspace />
-            </IconButton>
-            <Typography variant="h5" ml={-2}>
-              Edit User
-            </Typography>
-          </Box>
-          <Container
-            sx={{
-              marginTop: 8,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              width: "100%",
-            }}
-            maxWidth="xs"
-          >
-            <Box
-              component="form"
-              noValidate
-              onSubmit={handleSubmit(onSubmit)}
-              sx={{ mt: 3 }}
-              width="100%"
-            >
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  {userDetails && (
-                    <FormInputText
-                      control={control}
+        <section className="content-header">
+          <div className="container-fluid">
+            <div className="row mb-2">
+              <div className="col-sm-6">
+                <h1>Edit User</h1>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="content">
+          <div className="card card-primary">
+            <div className="card-body">
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="row">
+                  <div className="form-group col-12 col-md-6">
+                    <label htmlFor="email">Email</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      id="email"
                       defaultValue={email}
                       {...register("email", {
-                        required: {
-                          value: true,
-                          message: "Email field is required.",
-                        },
+                        required: "Email field is required.",
                         pattern: {
                           value: /^\S+@\S+\.\S+$/,
                           message: "Please enter a valid email address.",
                         },
                       })}
-                      label="Email"
                     />
-                  )}
-                </Grid>
-
-                <Grid item xs={12}>
-                  {userDetails && (
-                    <FormInputText
-                      control={control}
+                    {errors.email && (
+                      <span className="error invalid-feedback">
+                        {errors.email.message}
+                      </span>
+                    )}
+                  </div>
+                  <div className="form-group col-12 col-md-6">
+                    <label htmlFor="roleId">Role</label>
+                    <select
+                      className="form-control"
+                      id="roleId"
+                      {...register("roleId")}
+                    >
+                      {roleHelper &&
+                        roleHelper.map((role, index) => (
+                          <option key={index} value={role.value}>
+                            {role.label}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                  <div className="form-group col-12 col-md-6">
+                    <label htmlFor="firstName">First Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="firstName"
                       defaultValue={userDetails?.firstName}
                       {...register("firstName", {
                         pattern: {
@@ -125,15 +134,19 @@ const EditUser = () => {
                           message: "Name should contain alphabets only.",
                         },
                       })}
-                      label="First name"
                     />
-                  )}
-                </Grid>
-
-                <Grid item xs={12}>
-                  {userDetails && (
-                    <FormInputText
-                      control={control}
+                    {errors.firstName && (
+                      <span className="error invalid-feedback">
+                        {errors.firstName.message}
+                      </span>
+                    )}
+                  </div>
+                  <div className="form-group col-12 col-md-6">
+                    <label htmlFor="lastName">Last Name</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="lastName"
                       defaultValue={userDetails?.lastName}
                       {...register("lastName", {
                         pattern: {
@@ -141,39 +154,28 @@ const EditUser = () => {
                           message: "Name should contain alphabets only.",
                         },
                       })}
-                      label="Last name"
                     />
-                  )}
-                </Grid>
+                    {errors.lastName && (
+                      <span className="error invalid-feedback">
+                        {errors.lastName.message}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {error && (
+                  <div className="text-danger">{error?.data.message}</div>
+                )}
 
-                <Grid item xs={12}>
-                  {userDetails && (
-                    <FormAutoCompleteField
-                      name="roleId"
-                      options={roleHelper}
-                      label="Role"
-                      control={control}
-                      defaultValue={
-                        roleHelper?.filter(
-                          (role) => role.label === userDetails?.roleId
-                        )[0]
-                      }
-                    />
-                  )}
-                </Grid>
-              </Grid>
-
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2, bgcolor: "#7d56d4" }}
-              >
-                Edit
-              </Button>
-            </Box>
-          </Container>
-        </Container>
+                <button type="submit" className="btn btn-primary mt-3">
+                  Edit
+                </button>
+                <Link to="/users" className="btn btn-link mt-3">
+                  Cancel
+                </Link>
+              </form>
+            </div>
+          </div>
+        </section>
       </div>
     </>
   );

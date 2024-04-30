@@ -97,6 +97,41 @@ function LoginHistories() {
         <section className="content">
           <div className="card">
             <div className="card-body">
+              <div className="container-fluid">
+                <div className="row">
+                  {userRole !== "User" && (
+                    <div className="col-6 col-md-4 my-1">
+                      <AutoCompleteField
+                        options={userDD?.data || []}
+                        label="User"
+                        multiple
+                      />
+                    </div>
+                  )}
+                  <div className="col-6 col-md-4 my-1">
+                    <SearchField label="Search Text" placeholder="Enter text" />
+                  </div>
+                  <div className="col-6 col-md-4 my-1">
+                    <DatePickerField label="From" />
+                  </div>
+                  <div className="col-6 col-md-4 my-1">
+                    <DatePickerField to label="To" />
+                  </div>
+                  <div className="col-6 col-md-4 my-1">
+                    <AutoCompleteField
+                      options={browserDD?.data || []}
+                      label="Browser"
+                    />
+                  </div>
+                  <div className="col-6 col-md-4 my-1">
+                    <AutoCompleteField options={osDD?.data || []} label="OS" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="card">
+            <div className="card-body">
               <Table {...pageInfo} />
             </div>
           </div>

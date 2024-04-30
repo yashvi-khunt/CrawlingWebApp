@@ -111,6 +111,8 @@ export const authRoutes: Global.AuthRoutes = [
         path: "sent-confirm-email",
         element: <SendEmail />,
       },
+
+      // Password reset mail sent succesffuly page????  path:sent-password-email/:email
     ],
   },
 ];
