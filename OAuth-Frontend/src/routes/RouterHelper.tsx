@@ -1,4 +1,3 @@
-import { Login } from "@mui/icons-material";
 import {
   ProfilePage,
   ProfileEdit,
@@ -13,6 +12,7 @@ import {
   SetPassword,
   EmailConfirmSuccess,
   SendEmail,
+  Login,
 } from "../pages";
 
 export const routerHelper: Global.RouteConfig = [

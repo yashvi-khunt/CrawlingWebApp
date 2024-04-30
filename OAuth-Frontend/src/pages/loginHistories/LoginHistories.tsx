@@ -18,6 +18,7 @@ import AutoCompleteField from "../../components/dynamicTable/AutoCompleteField";
 import DatePickerField from "../../components/dynamicTable/DatePickerField";
 import Table from "../../components/dynamicTable/DynamicTable";
 import SearchField from "../../components/dynamicTable/SearchField";
+import { TableColumn } from "react-data-table-component/dist/DataTable/types";
 
 function LoginHistories() {
   const [searchParams] = useSearchParams();
@@ -33,49 +34,49 @@ function LoginHistories() {
 
   const userRole = useAppSelector((state) => state.auth.userData?.role);
 
-  const columns: GridColDef[] = [
+  const columns: TableColumn<ApiTypes.loginHistoriesProps>[] = [
     {
-      field: "userName",
-      headerName: "User",
-      width: 150,
+      name: "Email",
+      selector: (row) => row.email,
+      sortable: true,
+      sortField: "email",
     },
     {
-      field: "date",
-      headerName: "Date",
-      renderCell: ({ row }: GridRenderCellParams) =>
-        dayjs(row.dateTime).format("DD/MM/YYYY HH:mm A"),
-      width: 200,
+      name: "Date",
+      selector: (row) => dayjs(row.dateTime).format("DD/MM/YYYY hh:mm A"),
+      sortable: true,
+      sortField: "date",
     },
     {
-      field: "ipAddress",
-      headerName: "IP Address",
-      renderCell: ({ value }: GridRenderCellParams) =>
-        value === "::1" ? "Local Host" : value,
-      width: 150,
+      name: "IP Address",
+      selector: (row) =>
+        row.ipAddress === "::1" ? "Local Host" : row.ipAddress,
+      sortable: true,
+      sortField: "ipAddress",
     },
     {
-      field: "browser",
-      headerName: "Browser",
-      width: 150,
+      name: "Browser",
+      selector: (row) => row.browser,
+      sortable: true,
+      sortField: "browser",
     },
     {
-      field: "os",
-      headerName: "OS",
-      width: 150,
+      name: "OS",
+      selector: (row) => row.os,
+      sortable: true,
+      sortField: "os",
     },
     {
-      field: "device",
-      headerName: "Device",
-      renderCell: ({ value }: GridRenderCellParams) => {
-        return value || "-";
-      },
-      width: 150,
+      name: "Device",
+      selector: (row) => row.device || "-",
+      sortable: true,
+      sortField: "device",
     },
   ];
 
   const pageInfo: DynamicTable.TableProps = {
     columns: columns,
-    rows: data?.data.loginHistories as GridValidRowModel[] | undefined,
+    rows: data?.data.loginHistories,
     rowCount: data?.data.count,
   };
   return (
@@ -95,48 +96,10 @@ function LoginHistories() {
         {/* Main content */}
         <section className="content">
           <div className="card">
-            {/* /.card-header */}
             <div className="card-body">
-              <Table {...pageInfo}>
-                <Grid container spacing={2} paddingBottom={2}>
-                  {/* {userRole !== "User" && (
-                    <Grid item xs={6} md={3}>
-                      <AutoCompleteField
-                        options={userDD?.data || []}
-                        label="User"
-                        multiple
-                      />
-                    </Grid>
-                  )} */}
-                  <Grid item xs={6} md={4} xl={2}>
-                    <SearchField label="Search Text" placeholder="Enter text" />
-                  </Grid>
-                  <Grid item xs={6} md={4} xl={2}>
-                    <AutoCompleteField
-                      options={(browserDD && browserDD) || []}
-                      label="Browser"
-                      multiple
-                    />
-                  </Grid>
-                  <Grid item xs={6} md={4} xl={2}>
-                    <AutoCompleteField
-                      options={(osDD && osDD) || []}
-                      label="Os"
-                      multiple
-                    />
-                  </Grid>
-                  <Grid item xs={6} md={4} xl={2}>
-                    <DatePickerField label="From" />
-                  </Grid>
-                  <Grid item xs={6} md={4} xl={2}>
-                    <DatePickerField to label="To" />
-                  </Grid>
-                </Grid>
-              </Table>
+              <Table {...pageInfo} />
             </div>
-            {/* /.card-body */}
           </div>
-          {/* /.card */}
         </section>
         {/* /.content */}
       </div>

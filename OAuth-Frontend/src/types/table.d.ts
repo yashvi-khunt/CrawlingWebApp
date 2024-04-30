@@ -11,8 +11,8 @@ declare namespace DynamicTable {
   };
 
   type TableProps = {
-    columns?: import("@mui/x-data-grid").GridColDef[];
-    rows?: import("@mui/x-data-grid").GridRowsProp;
+    columns?: import("react-data-table-component").TableColumn<ApiTypes.userListProps>[];
+    rows?: ApiTypes.userListProps[];
     rowCount?: number;
   };
 }

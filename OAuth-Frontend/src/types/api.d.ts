@@ -13,7 +13,7 @@ declare namespace ApiTypes {
   type GetUsersProps = Omit<Global.apiResponse, "data"> & {
     data: {
       count: number;
-      users: userListProps;
+      users: userListProps[];
     };
   };
 
@@ -33,7 +33,7 @@ declare namespace ApiTypes {
   type loginHistoriesProps = {
     id: number;
     userId: string;
-    userName: string;
+    email: string;
     dateTime: string;
     ipAddress: string;
     browser: string;
