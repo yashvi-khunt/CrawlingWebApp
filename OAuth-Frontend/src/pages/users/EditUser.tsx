@@ -1,19 +1,6 @@
-import { ArrowBack, KeyboardBackspace } from "@mui/icons-material";
-import {
-  Autocomplete,
-  Box,
-  Button,
-  Container,
-  Grid,
-  IconButton,
-  Link,
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import { FormInputText } from "../../components";
+
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -22,7 +9,6 @@ import {
   useUserDetailsQuery,
 } from "../../redux/api/userApi";
 import { openSnackbar } from "../../redux/slice/snackbarSlice";
-import FormAutoCompleteField from "../../components/form/FormAutoCompleteField";
 
 const EditUser = () => {
   const navigate = useNavigate();
@@ -169,9 +155,9 @@ const EditUser = () => {
                 <button type="submit" className="btn btn-primary mt-3">
                   Edit
                 </button>
-                <Link to="/users" className="btn btn-link mt-3">
+                <a href="/users" className="btn btn-link mt-3">
                   Cancel
-                </Link>
+                </a>
               </form>
             </div>
           </div>

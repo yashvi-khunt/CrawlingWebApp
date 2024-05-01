@@ -44,7 +44,7 @@ declare namespace ApiTypes {
   type GetLoginHistoriesProps = Omit<Global.apiResponse, "data"> & {
     data: {
       count: number;
-      loginHistories: loginHistoriesProps;
+      loginHistories: loginHistoriesProps[];
     };
   };
 }

@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import dayjs from "dayjs";
 import {
   useGetUserListQuery,
+  useToggleUserMutation,
   useUsersWithNamesQuery,
 } from "../../redux/api/userApi";
 import Table from "../../components/dynamicTable/DynamicTable";
@@ -59,9 +60,76 @@ function Users() {
     },
     {
       name: "Status",
-      selector: (row) => (row.isActivated ? "Active" : "DeActive"),
+      selector: (row) => (row.isActivated ? "Active" : "Deactive"),
+    },
+    {
+      name: "Action",
+      selector: (row) => (
+        <>
+          <div className="row">
+            <a className="btn" href={`/users/edit/${row.email}`}>
+              <i
+                className="fa fa-pen text-info"
+                style={{ fontSize: "large" }}
+              ></i>
+            </a>
+
+            <button
+              className="btn"
+              onClick={() => handleUserStatusChange(row.userId)}
+            >
+              <i
+                className="fa fa-shuffle text-primary"
+                style={{ fontSize: "large" }}
+              ></i>
+            </button>
+
+            <a className="btn" href={`/users/details?email=${row.email}`}>
+              <i
+                className="fa fa-info-circle text-info"
+                style={{ fontSize: "large" }}
+              ></i>
+            </a>
+          </div>
+          {/* <GridActionsCellItem
+            icon={
+              !row.isActivated ? (
+                <Person color={"primary"} />
+              ) : (
+                <PersonOff color={"primary"} />
+              )
+            }
+            label="Edit"
+            className="textPrimary"
+            title={row.isActivated ? "Dectivate" : "Activate"}
+            onClick={() => handleUserStatusChange(row.userId)}
+          />
+          <GridActionsCellItem
+            icon={<InfoOutlined color="info" />}
+            label="Info"
+            className="textPrimary"
+            title={"Info"}
+            onClick={() => navigate(`/users/details?email=${row.email}`)}
+          /> */}
+        </>
+      ),
     },
   ];
+
+  const [toggleApi, { data: toggleData, error: toggleError }] =
+    useToggleUserMutation();
+
+  const handleUserStatusChange = (id) => {
+    console.log(id);
+    toggleApi(id as string);
+  };
+
+  useEffect(() => {
+    toggleData?.success &&
+      dispatch(
+        openSnackbar({ severity: "success", message: toggleData.message })
+      );
+  }, [toggleData?.data]);
 
   const pageInfo: DynamicTable.TableProps = {
     columns: columns,
@@ -74,11 +142,11 @@ function Users() {
     <div className="content-wrapper">
       <section className="content-header">
         <div className="container-fluid">
-          <div className="row mb-2">
-            <div className="col-sm-6">
+          <div className="row mb-2 justify-between">
+            <div>
               <h1>Users</h1>
             </div>
-            <div className="col-sm-6">
+            <div>
               <button
                 onClick={() => navigate("/users/add")}
                 className="btn btn-primary float-sm-right"
@@ -95,7 +163,7 @@ function Users() {
             <div className="container-fluid">
               <div className="row">
                 {userRole !== "User" && (
-                  <div className="col-6 col-md-3">
+                  <div className="col-6 col-md-3 my-1">
                     <AutoCompleteField
                       options={userDD?.data || []}
                       label="User"
@@ -103,13 +171,13 @@ function Users() {
                     />
                   </div>
                 )}
-                <div className="col-6 col-md-3">
+                <div className="col-6 col-md-3 my-1">
                   <SearchField label="Search Text" placeholder="Enter text" />
                 </div>
-                <div className="col-6 col-md-3">
+                <div className="col-6 col-md-3 my-1">
                   <DatePickerField label="From" />
                 </div>
-                <div className="col-6 col-md-3">
+                <div className="col-6 col-md-3 my-1">
                   <DatePickerField to label="To" />
                 </div>
               </div>

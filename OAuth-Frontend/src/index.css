@@ -12,3 +12,7 @@
   display: block;
   color: red;
 }
+
+.justify-between {
+  justify-content: space-between;
+}

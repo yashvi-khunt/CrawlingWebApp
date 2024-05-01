@@ -60,7 +60,7 @@ function Login() {
   }, [apisuccess?.data]);
 
   useEffect(() => {
-    console.log(apiError);
+    setError(apiError?.data.message);
   }, [apiError]);
 
   return (
