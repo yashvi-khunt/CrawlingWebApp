@@ -80,6 +80,13 @@ namespace LoginSystem.Controllers
                     return ReturnResponse(new BaseResponse<VMGoogleSignin>(response.ResponseMessage, response.Errors));
 
                 var userRole = await _userManager.GetRolesAsync(response.Data);
+                var user = await _userManager.FindByEmailAsync(response.Data.Email);
+
+                if (!user.IsActivated)
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, new Response("User not active. Please contact admin.", false));
+                }
+
                 //var jwtResponse = CreateJwtToken(response.Data);
                 var jwtResponse = GenerateJwtToken(response.Data, userRole);
 
@@ -88,7 +95,7 @@ namespace LoginSystem.Controllers
                     Token = jwtResponse,
                 };
 
-                var user = await _userManager.FindByEmailAsync(response.Data.Email);
+               
                 var ipAddress = HttpContext.Connection.RemoteIpAddress.ToString();
 
                 // Parse User-Agent header to get browser, OS, and device details
