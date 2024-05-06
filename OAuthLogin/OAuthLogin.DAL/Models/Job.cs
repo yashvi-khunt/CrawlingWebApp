@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace OAuthLogin.DAL.Models
+﻿namespace OAuthLogin.DAL.Models
 {
     public class Job
     {
@@ -8,12 +6,7 @@ namespace OAuthLogin.DAL.Models
         public string Name { get; set; }
         
         public string URL { get; set; }
-        
-        public DateTime CreatedDate { get; set; }
-
-        [ForeignKey(nameof(ApplicationUser.Id))]
-        public string CreatedBy { get; set; }
-        
+        public string LevelXPath { get; set; }
 
     }
 }
