@@ -11,18 +11,14 @@ declare namespace DatePickerFields {
   type DatePickerFieldProps = {
     to?: boolean;
     label?: string;
-    page?: "leave" | "attendance";
   };
 }
 
 const DatePickerField = ({
   to = false,
   label = "Select a date",
-  page = "leave",
 }: DatePickerFields.DatePickerFieldProps) => {
-  const [defaultValue, setValue] = useState<Dayjs | null>(
-    page === "leave" ? null : dayjs(Date.now())
-  );
+  const [defaultValue, setValue] = useState<Dayjs | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const paramKey = `${to ? "to" : "from"}Date`;
   const dispatch = useAppDispatch();

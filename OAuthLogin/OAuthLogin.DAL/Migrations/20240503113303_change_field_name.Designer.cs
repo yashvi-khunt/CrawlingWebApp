@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OAuthLogin.DAL.Helper;
 
@@ -11,9 +12,11 @@ using OAuthLogin.DAL.Helper;
 namespace OAuthLogin.DAL.Migrations
 {
     [DbContext(typeof(OAuthDbContext))]
-    partial class OAuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240503113303_change_field_name")]
+    partial class change_field_name
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -293,7 +296,7 @@ namespace OAuthLogin.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Jobs", (string)null);
+                    b.ToTable("Jobs");
                 });
 
             modelBuilder.Entity("OAuthLogin.DAL.Models.JobParameter", b =>
@@ -322,7 +325,7 @@ namespace OAuthLogin.DAL.Migrations
 
                     b.HasIndex("JobId");
 
-                    b.ToTable("JobParameters", (string)null);
+                    b.ToTable("JobParameters");
                 });
 
             modelBuilder.Entity("OAuthLogin.DAL.Models.JobResponse", b =>
@@ -348,7 +351,7 @@ namespace OAuthLogin.DAL.Migrations
 
                     b.HasIndex("JobParameterId");
 
-                    b.ToTable("JobResponses", (string)null);
+                    b.ToTable("JobResponses");
                 });
 
             modelBuilder.Entity("OAuthLogin.DAL.Models.LoginHistory", b =>
@@ -383,7 +386,7 @@ namespace OAuthLogin.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LoginHistories", (string)null);
+                    b.ToTable("LoginHistories");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

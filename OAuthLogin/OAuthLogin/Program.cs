@@ -1,6 +1,4 @@
-
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +20,12 @@ namespace OAuthLogin
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddHangfire(configuration => configuration
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+        .UseSqlServerStorage(builder.Configuration.GetConnectionString("Default")));
+            builder.Services.AddHangfireServer();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -74,6 +78,7 @@ namespace OAuthLogin
             builder.Services.AddTransient<IProcedureManager, ProcedureManager>();
             builder.Services.AddTransient<ILoginHistoryService, LoginHistoryService>();
             builder.Services.AddTransient<IGoogleAuthService, GoogleAuthService>();
+            builder.Services.AddTransient<ICrawlerService, CrawlerService>();
 
 
             builder.Services.AddAuthentication(options =>
@@ -101,7 +106,7 @@ namespace OAuthLogin
                 googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
                 googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
                 googleOptions.SignInScheme = IdentityConstants.ExternalScheme;
-            }); 
+            });
 
 
             builder.Services.Configure<IdentityOptions>(options =>
@@ -145,12 +150,13 @@ namespace OAuthLogin
             app.UseHttpsRedirection();
             app.UseCors("AllowAllOrigins");
 
+            app.UseHangfireDashboard();
             app.UseAuthentication();
             app.UseAuthorization();
 
 
             app.MapControllers();
-
+            app.MapHangfireDashboard();
             app.Run();
         }
     }

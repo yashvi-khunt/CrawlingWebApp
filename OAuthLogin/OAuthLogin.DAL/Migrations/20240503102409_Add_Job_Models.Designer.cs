@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OAuthLogin.DAL.Helper;
 
@@ -11,9 +12,11 @@ using OAuthLogin.DAL.Helper;
 namespace OAuthLogin.DAL.Migrations
 {
     [DbContext(typeof(OAuthDbContext))]
-    partial class OAuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240503102409_Add_Job_Models")]
+    partial class Add_Job_Models
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,12 +54,12 @@ namespace OAuthLogin.DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "bfe0aad1-d739-4ee8-ad4e-aaf3b87de946",
+                            Id = "186a38bc-0016-4523-8f7a-445099c04ed0",
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = "015a9111-4ff1-4a3c-8be9-be17e316d54d",
+                            Id = "94a5ff6f-e874-4d2a-8df7-bd99a0bc84be",
                             Name = "User"
                         });
                 });
@@ -150,8 +153,8 @@ namespace OAuthLogin.DAL.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "695a5676-65e6-4587-9353-916b38852796",
-                            RoleId = "bfe0aad1-d739-4ee8-ad4e-aaf3b87de946"
+                            UserId = "af4e53c2-e353-46a1-8611-e64fc83a8815",
+                            RoleId = "186a38bc-0016-4523-8f7a-445099c04ed0"
                         });
                 });
 
@@ -253,19 +256,19 @@ namespace OAuthLogin.DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "695a5676-65e6-4587-9353-916b38852796",
+                            Id = "af4e53c2-e353-46a1-8611-e64fc83a8815",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "68e850ac-f02c-4cd5-80c5-2a9d26ec2844",
-                            CreatedDate = new DateTime(2024, 5, 3, 17, 3, 3, 227, DateTimeKind.Local).AddTicks(4645),
+                            ConcurrencyStamp = "0a43f74f-8868-4e12-be4c-9879b07c125c",
+                            CreatedDate = new DateTime(2024, 5, 3, 15, 54, 8, 466, DateTimeKind.Local).AddTicks(5664),
                             Email = "Admin@example.com",
                             EmailConfirmed = true,
                             IsActivated = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@EXAMPLE.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEHlKlbaxg/S/BmxcAkUlINKCQhg0x6ra81QiCY1CYnFl/kRDdn/dSUo9Tj1sPJ/jSQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGQrGIuyXkWu6wxH5PPJ/+wZnaePFNIwnrwd0lVORE1hpbcKzvU3kFBYfC0RpN+etQ==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "7a6f343e-175a-4054-a009-06dc273ec906",
+                            SecurityStamp = "ca9647aa-4fd3-4f48-8e36-90211e912336",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
@@ -293,7 +296,7 @@ namespace OAuthLogin.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Jobs", (string)null);
+                    b.ToTable("Jobs");
                 });
 
             modelBuilder.Entity("OAuthLogin.DAL.Models.JobParameter", b =>
@@ -322,7 +325,7 @@ namespace OAuthLogin.DAL.Migrations
 
                     b.HasIndex("JobId");
 
-                    b.ToTable("JobParameters", (string)null);
+                    b.ToTable("JobParameters");
                 });
 
             modelBuilder.Entity("OAuthLogin.DAL.Models.JobResponse", b =>
@@ -336,7 +339,7 @@ namespace OAuthLogin.DAL.Migrations
                     b.Property<int>("JobParameterId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ParamOrder")
+                    b.Property<string>("Order")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -348,7 +351,7 @@ namespace OAuthLogin.DAL.Migrations
 
                     b.HasIndex("JobParameterId");
 
-                    b.ToTable("JobResponses", (string)null);
+                    b.ToTable("JobResponses");
                 });
 
             modelBuilder.Entity("OAuthLogin.DAL.Models.LoginHistory", b =>
@@ -383,7 +386,7 @@ namespace OAuthLogin.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LoginHistories", (string)null);
+                    b.ToTable("LoginHistories");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

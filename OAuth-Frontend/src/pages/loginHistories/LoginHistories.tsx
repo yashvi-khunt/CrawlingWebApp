@@ -119,12 +119,12 @@ function LoginHistories() {
                   </div>
                   <div className="col-6 col-md-4 my-1">
                     <AutoCompleteField
-                      options={browserDD?.data || []}
+                      options={browserDD || []}
                       label="Browser"
                     />
                   </div>
                   <div className="col-6 col-md-4 my-1">
-                    <AutoCompleteField options={osDD?.data || []} label="OS" />
+                    <AutoCompleteField options={osDD || []} label="OS" />
                   </div>
                 </div>
               </div>

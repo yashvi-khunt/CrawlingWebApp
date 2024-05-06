@@ -53,6 +53,9 @@ const Table = ({ ...props }: DynamicTable.TableProps) => {
         data={props?.rows || []}
         fixedHeader
         onSort={handleSortChange}
+        highlightOnHover
+        persistTableHead
+        responsive
         sortServer
         pagination
         paginationServer

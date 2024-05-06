@@ -9,6 +9,9 @@ namespace OAuthLogin.DAL.Helper
     public partial class OAuthDbContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<LoginHistory> LoginHistories { get; set; }
+        public DbSet<Job> Jobs { get; set; }
+        public DbSet<JobParameter> JobParameters { get; set; }
+        public DbSet<JobResponse> JobResponses { get; set; }
         public OAuthDbContext(DbContextOptions<OAuthDbContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder builder)

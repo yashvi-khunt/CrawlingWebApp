@@ -91,26 +91,6 @@ function Users() {
               ></i>
             </a>
           </div>
-          {/* <GridActionsCellItem
-            icon={
-              !row.isActivated ? (
-                <Person color={"primary"} />
-              ) : (
-                <PersonOff color={"primary"} />
-              )
-            }
-            label="Edit"
-            className="textPrimary"
-            title={row.isActivated ? "Dectivate" : "Activate"}
-            onClick={() => handleUserStatusChange(row.userId)}
-          />
-          <GridActionsCellItem
-            icon={<InfoOutlined color="info" />}
-            label="Info"
-            className="textPrimary"
-            title={"Info"}
-            onClick={() => navigate(`/users/details?email=${row.email}`)}
-          /> */}
         </>
       ),
     },
