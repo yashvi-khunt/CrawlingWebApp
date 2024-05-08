@@ -14,7 +14,7 @@ export const indexApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["User", "LoginHistory"],
+  tagTypes: ["User", "LoginHistory", "CrawlingJob"],
   endpoints: (builder) => ({}),
 });
 

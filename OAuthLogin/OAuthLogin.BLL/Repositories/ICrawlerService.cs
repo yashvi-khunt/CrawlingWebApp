@@ -1,5 +1,6 @@
 ﻿
 using OAuthLogin.DAL.Models;
+using OAuthLogin.DAL.ViewModels;
 
 namespace OAuthLogin.BLL.Repositories
 {
@@ -7,5 +8,6 @@ namespace OAuthLogin.BLL.Repositories
     {
          Task<List<JobResponse>> GetData(int JobId);
         public void GetDetailsData(int JobId);
+        Task<Job> AddCrawlingJob(VMAddCrawlingJob vMAddCrawlingJob);
     }
 }

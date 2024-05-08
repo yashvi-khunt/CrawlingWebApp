@@ -14,6 +14,8 @@ import {
   SendEmail,
   Login,
 } from "../pages";
+import AddNewJob from "../pages/crawler/AddNewJob";
+import CrawlingJobs from "../pages/crawler/CrawlingJobs";
 
 export const routerHelper: Global.RouteConfig = [
   {
@@ -72,6 +74,25 @@ export const routerHelper: Global.RouteConfig = [
       {
         path: "",
         element: <LoginHistories />,
+        roles: ["Admin", "User"],
+      },
+    ],
+  },
+  {
+    name: "Crawling Jobs",
+    path: "/crawling-jobs",
+    element: null,
+    roles: ["Admin", "User"],
+    iconClass: "fa-database",
+    children: [
+      {
+        path: "",
+        element: <CrawlingJobs />,
+        roles: ["Admin", "User"],
+      },
+      {
+        path: "add",
+        element: <AddNewJob />,
         roles: ["Admin", "User"],
       },
     ],

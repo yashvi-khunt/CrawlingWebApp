@@ -47,4 +47,16 @@ declare namespace ApiTypes {
       loginHistories: loginHistoriesProps[];
     };
   };
+
+  type AddCrawlingJobParams = {
+    jobName: string;
+    url: string;
+    parameters: [
+      {
+        param: string;
+        xpath: string;
+        isLevelParam: string;
+      }
+    ];
+  };
 }

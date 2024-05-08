@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OAuthLogin.BLL.Repositories;
 using OAuthLogin.DAL.Helper;
 using OAuthLogin.DAL.Models;
+using OAuthLogin.DAL.ViewModels;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
@@ -16,6 +17,33 @@ namespace OAuthLogin.BLL.Services
             _context = dbContext;
         }
 
+        public Task<Job> AddCrawlingJob(VMAddCrawlingJob vMAddCrawlingJob)
+        {
+            var newJob = new Job
+            {
+                Name = vMAddCrawlingJob.JobName,
+                URL = vMAddCrawlingJob.URL,
+                LevelXPath = ""
+            };
+            _context.Jobs.Add(newJob);
+
+            _context.SaveChanges();
+
+            foreach (var item in vMAddCrawlingJob.Parameters)
+            {
+                var param = new JobParameter
+                {
+                    ParameterName = item.Param,
+                    XPath = item.Xpath,
+                    IsLevelParameter = item.IsLevelParam,
+                    JobId = newJob.Id,
+                };
+                _context.JobParameters.Add(param);
+            }
+
+           // _context.SaveChanges();
+            return Task.FromResult(newJob);
+        }
 
         public Task<List<JobResponse>> GetData(int JobId)
         {
