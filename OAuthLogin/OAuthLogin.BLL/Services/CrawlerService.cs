@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using OAuthLogin.BLL.Repositories;
+using OAuthLogin.BLL.SQLRepository;
 using OAuthLogin.DAL.Helper;
 using OAuthLogin.DAL.Models;
 using OAuthLogin.DAL.ViewModels;
@@ -12,9 +13,11 @@ namespace OAuthLogin.BLL.Services
     public class CrawlerService : ICrawlerService
     {
         private readonly OAuthDbContext _context;
-        public CrawlerService(OAuthDbContext dbContext)
+        private readonly IProcedureManager _procedureManager;
+        public CrawlerService(OAuthDbContext dbContext, IProcedureManager procedureManager)
         {
             _context = dbContext;
+            _procedureManager = procedureManager;
         }
 
         public Task<Job> AddCrawlingJob(VMAddCrawlingJob vMAddCrawlingJob)
@@ -41,8 +44,54 @@ namespace OAuthLogin.BLL.Services
                 _context.JobParameters.Add(param);
             }
 
-           // _context.SaveChanges();
+            _context.SaveChanges();
             return Task.FromResult(newJob);
+        }
+
+        public Task<VMGetCrawlingJobs> GetAllCrawlingJobs(VMGetCrawlingJobsInput vMGetCrawlingJobsInput)
+        {
+
+
+            var crawlingJobs = _procedureManager.ExecStoreProcedureMulResults<StoredProcedureCommonModel, VMSpGetCrawlingJobs>(StoredProcedure.GetCrawlingJobs, vMGetCrawlingJobsInput);
+
+            var countData = crawlingJobs.Item1[0].Count;
+            var crawlingJobsData = crawlingJobs.Item2;
+
+
+            VMGetCrawlingJobs getCrawlingJobs = new VMGetCrawlingJobs
+            {
+                Count = (int)countData,
+                CrawlingJobs = crawlingJobsData
+            };
+
+            return Task.FromResult(getCrawlingJobs);
+        }
+
+        public Task<List<VMJobResponseForJobId>> GetResponseForJobId(int JobId)
+        {
+            var response = _procedureManager.ExecStoreProcedureMulResults<StoredProcedureCommonModel, VMSPJobResponse>(StoredProcedure.GetResponseForJobId, JobId);
+
+            var totalJobs = response.Item1[0].Count;
+            var responseData = response.Item2;
+            List<VMJobResponseForJobId> jobResponse = new List<VMJobResponseForJobId>();
+
+            for (var count = 1; count <= totalJobs; count++)
+            {
+                var jobs = responseData.FindAll(r => r.ParamOrder == count);
+                List<VMJobResponseData> responseList = new List<VMJobResponseData>();
+                foreach (var job in jobs)
+                {
+                    responseList.Add(
+                    new VMJobResponseData
+                    {
+                        ParameterName = job.ParameterName,
+                        Value = job.Value,
+                    });
+                }
+                jobResponse.Add(new VMJobResponseForJobId { ParamOrder = count,Data=responseList});
+            }
+            return Task.FromResult(jobResponse);
+
         }
 
         public Task<List<JobResponse>> GetData(int JobId)
@@ -64,10 +113,14 @@ namespace OAuthLogin.BLL.Services
                 foreach (var param in jobParams)
                 {
                     var results = driver.FindElements(By.XPath(param.XPath));
+                    if (results.Count == 0)
+                    {
+                        // return Task.FromResult(new List<JobResponse>());
+                    }
                     var count = 1;
                     foreach (var result in results)
                     {
-                        var existingJobResponse = _context.JobResponses.FirstOrDefault(jr => jr.JobParameterId == param.Id && jr.ParamOrder == count.ToString());
+                        var existingJobResponse = _context.JobResponses.FirstOrDefault(jr => jr.JobParameterId == param.Id && jr.ParamOrder == count);
 
                         if (existingJobResponse != null)
                         {
@@ -79,7 +132,7 @@ namespace OAuthLogin.BLL.Services
                             {
                                 JobParameterId = param.Id,
                                 Value = param.ParameterName != "nextURL" ? result.Text : result.GetAttribute("href"),
-                                ParamOrder = count.ToString(),
+                                ParamOrder = count,
                             };
 
                             _context.JobResponses.Add(jobResponse);
@@ -93,7 +146,7 @@ namespace OAuthLogin.BLL.Services
 
             }
 
-            
+
 
             var jobResponses = _context.JobResponses.Include(jr => jr.JobParameter).Where(j => j.JobParameter.JobId == job.Id).ToList();
             return Task.FromResult(jobResponses);
@@ -115,7 +168,7 @@ namespace OAuthLogin.BLL.Services
 
                 foreach (var job in jobs)
                 {
-                driver.Navigate().GoToUrl(job.Value);
+                    driver.Navigate().GoToUrl(job.Value);
                     foreach (var param in jobParams)
                     {
 
@@ -123,10 +176,11 @@ namespace OAuthLogin.BLL.Services
                         try
                         {
                             result = driver.FindElement(By.XPath(param.XPath)).GetAttribute("textContent") ?? "";
-                        }catch (NoSuchElementException ex)
+                        }
+                        catch (NoSuchElementException ex)
                         {
                             ////log
-                            
+
                         }
 
                         var existingJobResponse = _context.JobResponses.FirstOrDefault(jr => jr.JobParameterId == param.Id && jr.ParamOrder == job.ParamOrder);
@@ -144,13 +198,14 @@ namespace OAuthLogin.BLL.Services
                             };
 
                             _context.JobResponses.Add(jobResponse);
-                        }                    }
+                        }
+                    }
                 }
 
                 _context.SaveChanges();
 
             }
         }
-      
+
     }
 }

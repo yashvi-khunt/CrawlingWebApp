@@ -9,5 +9,7 @@ namespace OAuthLogin.BLL.Repositories
          Task<List<JobResponse>> GetData(int JobId);
         public void GetDetailsData(int JobId);
         Task<Job> AddCrawlingJob(VMAddCrawlingJob vMAddCrawlingJob);
+        Task<VMGetCrawlingJobs> GetAllCrawlingJobs(VMGetCrawlingJobsInput vMGetHistoriesInput);
+        Task<List<VMJobResponseForJobId>> GetResponseForJobId(int JobId);
     }
 }

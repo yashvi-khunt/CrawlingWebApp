@@ -59,4 +59,19 @@ declare namespace ApiTypes {
       }
     ];
   };
+
+  type CrawlingJobProps = {
+    id: number;
+    jobId: number;
+    name: string;
+    url: string;
+    resultCount: number;
+  };
+
+  type GetCrawlingJobProps = Omit<Global.apiResponse, "data"> & {
+    data: {
+      count: number;
+      crawlingJobs: CrawlingJobProps[];
+    };
+  };
 }

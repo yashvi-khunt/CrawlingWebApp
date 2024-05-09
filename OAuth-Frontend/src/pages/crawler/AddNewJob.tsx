@@ -67,9 +67,7 @@ function AddNewJob() {
     if (levelParams.length > 0) {
       obj.parameters = [
         ...obj.parameters,
-        levelParams.length > 0 && [
-          ...levelParams.map((param) => ({ ...param, isLevelParam: true })),
-        ],
+        ...levelParams.map((param) => ({ ...param, isLevelParam: true })),
       ];
     }
 
