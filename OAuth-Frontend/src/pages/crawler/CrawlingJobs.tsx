@@ -29,6 +29,13 @@ function CrawlingJobs() {
       selector: (row) => row.url,
       sortable: false,
       sortField: "url",
+      cell: (row) => (
+        <div>
+          <a href={row.url} target="_blank">
+            {row.url}
+          </a>
+        </div>
+      ),
     },
     {
       name: "Total Results",
@@ -42,9 +49,6 @@ function CrawlingJobs() {
       selector: (row) => (
         <>
           <div className="row">
-            <a className="btn" href={row.url} target="_blank">
-              Visit site
-            </a>
             <a className="btn" href={`/crawling-jobs/details/${row.jobId}`}>
               View Response
             </a>
