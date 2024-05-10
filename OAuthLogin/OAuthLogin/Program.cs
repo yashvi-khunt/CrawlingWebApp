@@ -150,13 +150,15 @@ namespace OAuthLogin
             app.UseHttpsRedirection();
             app.UseCors("AllowAllOrigins");
 
-            app.UseHangfireDashboard();
             app.UseAuthentication();
             app.UseAuthorization();
 
 
             app.MapControllers();
+            
+            app.UseHangfireDashboard();
             app.MapHangfireDashboard();
+
             app.Run();
         }
     }

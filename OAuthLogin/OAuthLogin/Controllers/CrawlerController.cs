@@ -1,9 +1,7 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OAuthLogin.BLL.Repositories;
-using OAuthLogin.BLL.Services;
 using OAuthLogin.DAL.ViewModels;
 
 
@@ -18,32 +16,27 @@ namespace OAuthLogin.Controllers
         public CrawlerController(ICrawlerService crawlerService)
         {
             _crawlerService = crawlerService;
-                }
+        }
 
         [HttpGet]
         [Route("GetData/{jobId}")]
         public IActionResult GetData(int jobId)
         {
-            //var parentjobId = BackgroundJob.Enqueue(() => _crawlerService.GetData(jobId));
-            var result =  _crawlerService.GetData(jobId);
-            if(result.IsCompleted)
-            {
-                _crawlerService.GetDetailsData(jobId);
-            }
-            //Continuations Job - this job executed when its parent job is executed.
-            //BackgroundJob.ContinueJobWith(parentjobId, () => _crawlerService.GetDetailsData(jobId));
 
-            return Ok("Data loaded successfully!");
+            // Add or update the recurring job with the unique cron expression
+            RecurringJob.AddOrUpdate<ICrawlerService>($"Job{jobId}", x => x.TriggerJob(jobId), Cron.MinuteInterval(5));
+            return Ok(new Response("Data loading scheduled successfully!", true));
         }
+
 
         [HttpPost]
         [Route("AddJob")]
-        public  IActionResult AddJob(VMAddCrawlingJob vMAddCrawlingJob)
+        public IActionResult AddJob(VMAddCrawlingJob vMAddCrawlingJob)
         {
-            var response =  _crawlerService.AddCrawlingJob(vMAddCrawlingJob);
+            var response = _crawlerService.AddCrawlingJob(vMAddCrawlingJob);
             if (response.IsCompletedSuccessfully)
-                return Ok(new Response("Data Added Successfully!",true));
-            else return StatusCode(500, new Response("Something went wrong.",false));
+                return Ok(new Response("Data Added Successfully!", true));
+            else return StatusCode(500, new Response("Something went wrong.", false));
         }
 
         [HttpGet("GetCrawlingJobs")]
@@ -73,9 +66,9 @@ namespace OAuthLogin.Controllers
         public async Task<IActionResult> GetJobsForId(int JobId)
         {
             var response = await _crawlerService.GetResponseForJobId(JobId);
-            if(response != null)
+            if (response != null)
             {
-                return Ok(new Response<List<VMJobResponseForJobId>>(response,true,"Data loaded successfully!"));
+                return Ok(new Response<List<VMJobResponseForJobId>>(response, true, "Data loaded successfully!"));
             }
             else { return StatusCode(500, new Response("Something went wrong!", false)); }
         }

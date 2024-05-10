@@ -96,8 +96,16 @@ namespace OAuthLogin.BLL.Services
 
         }
 
-        public Task<List<JobResponse>> GetData(int JobId)
+
+        public async Task TriggerJob(int jobId)
         {
+            await GetData(jobId);
+            GetDetailsData(jobId);
+        }
+
+        public Task GetData(int JobId)
+        {
+            Console.WriteLine("Start....GetData");
             var job = _context.Jobs.Where(j => j.Id == JobId).FirstOrDefault();
             var jobParams = _context.JobParameters.Where(p => p.JobId == job.Id && p.IsLevelParameter == false).ToList();
 
@@ -157,6 +165,7 @@ namespace OAuthLogin.BLL.Services
 
         public void GetDetailsData(int JobId)
         {
+            Console.WriteLine("Start....GetDetailsData");
             var jobParams = _context.JobParameters.Where(j => j.JobId == JobId && j.IsLevelParameter == true).ToList();
 
             var jobs = _context.JobResponses.Include(j => j.JobParameter).Where(j => j.JobParameter.JobId == JobId && j.JobParameter.ParameterName == "nextURL").ToList();
