@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OAuthLogin.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class Add_Job_Models : Migration
+    public partial class Add_Job_Tables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -41,11 +41,19 @@ namespace OAuthLogin.DAL.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     URL = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LevelXPath = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    CreatedById = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastExecuted = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Jobs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Jobs_AspNetUsers_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -78,7 +86,7 @@ namespace OAuthLogin.DAL.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     JobParameterId = table.Column<int>(type: "int", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Order = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ParamOrder = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -96,19 +104,19 @@ namespace OAuthLogin.DAL.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "186a38bc-0016-4523-8f7a-445099c04ed0", null, "Admin", null },
-                    { "94a5ff6f-e874-4d2a-8df7-bd99a0bc84be", null, "User", null }
+                    { "79ab6df2-c982-4c5f-a246-779a5b92a0fd", null, "Admin", null },
+                    { "ef33b5d7-1678-41ef-b246-51aff1376ee9", null, "User", null }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "CreatedDate", "Email", "EmailConfirmed", "FirstName", "IsActivated", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "af4e53c2-e353-46a1-8611-e64fc83a8815", 0, "0a43f74f-8868-4e12-be4c-9879b07c125c", new DateTime(2024, 5, 3, 15, 54, 8, 466, DateTimeKind.Local).AddTicks(5664), "Admin@example.com", true, null, true, null, false, null, "ADMIN@EXAMPLE.COM", "ADMIN", "AQAAAAIAAYagAAAAEGQrGIuyXkWu6wxH5PPJ/+wZnaePFNIwnrwd0lVORE1hpbcKzvU3kFBYfC0RpN+etQ==", null, false, "ca9647aa-4fd3-4f48-8e36-90211e912336", false, "admin" });
+                values: new object[] { "22d0f874-6f4a-4451-8212-8c2d905d0ab2", 0, "dcffdb33-7e81-4d0a-a9a2-f0ecafeb7ea2", new DateTime(2024, 5, 10, 13, 5, 4, 684, DateTimeKind.Local).AddTicks(1492), "Admin@example.com", true, null, true, null, false, null, "ADMIN@EXAMPLE.COM", "ADMIN", "AQAAAAIAAYagAAAAEGtLTQFg0gg76k1WhPliYEgz1asYmhBcnm/Hq+QAmaoMEsvxUxDtenKwMP5hJu9p9g==", null, false, "e28ce2c9-bb4c-4693-afde-92267b708d10", false, "admin" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "186a38bc-0016-4523-8f7a-445099c04ed0", "af4e53c2-e353-46a1-8611-e64fc83a8815" });
+                values: new object[] { "79ab6df2-c982-4c5f-a246-779a5b92a0fd", "22d0f874-6f4a-4451-8212-8c2d905d0ab2" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_JobParameters_JobId",
@@ -119,6 +127,11 @@ namespace OAuthLogin.DAL.Migrations
                 name: "IX_JobResponses_JobParameterId",
                 table: "JobResponses",
                 column: "JobParameterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Jobs_CreatedById",
+                table: "Jobs",
+                column: "CreatedById");
         }
 
         /// <inheritdoc />
@@ -136,22 +149,22 @@ namespace OAuthLogin.DAL.Migrations
             migrationBuilder.DeleteData(
                 table: "AspNetRoles",
                 keyColumn: "Id",
-                keyValue: "94a5ff6f-e874-4d2a-8df7-bd99a0bc84be");
+                keyValue: "ef33b5d7-1678-41ef-b246-51aff1376ee9");
 
             migrationBuilder.DeleteData(
                 table: "AspNetUserRoles",
                 keyColumns: new[] { "RoleId", "UserId" },
-                keyValues: new object[] { "186a38bc-0016-4523-8f7a-445099c04ed0", "af4e53c2-e353-46a1-8611-e64fc83a8815" });
+                keyValues: new object[] { "79ab6df2-c982-4c5f-a246-779a5b92a0fd", "22d0f874-6f4a-4451-8212-8c2d905d0ab2" });
 
             migrationBuilder.DeleteData(
                 table: "AspNetRoles",
                 keyColumn: "Id",
-                keyValue: "186a38bc-0016-4523-8f7a-445099c04ed0");
+                keyValue: "79ab6df2-c982-4c5f-a246-779a5b92a0fd");
 
             migrationBuilder.DeleteData(
                 table: "AspNetUsers",
                 keyColumn: "Id",
-                keyValue: "af4e53c2-e353-46a1-8611-e64fc83a8815");
+                keyValue: "22d0f874-6f4a-4451-8212-8c2d905d0ab2");
 
             migrationBuilder.InsertData(
                 table: "AspNetRoles",

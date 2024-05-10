@@ -51,12 +51,12 @@ namespace OAuthLogin.DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "e95e4d1a-3d9f-4377-93c8-262bab017cb8",
+                            Id = "79ab6df2-c982-4c5f-a246-779a5b92a0fd",
                             Name = "Admin"
                         },
                         new
                         {
-                            Id = "3ea79330-9249-46ee-bc13-85cacc149a49",
+                            Id = "ef33b5d7-1678-41ef-b246-51aff1376ee9",
                             Name = "User"
                         });
                 });
@@ -150,8 +150,8 @@ namespace OAuthLogin.DAL.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "36a66be9-dc6d-4078-ad11-e314236d81f1",
-                            RoleId = "e95e4d1a-3d9f-4377-93c8-262bab017cb8"
+                            UserId = "22d0f874-6f4a-4451-8212-8c2d905d0ab2",
+                            RoleId = "79ab6df2-c982-4c5f-a246-779a5b92a0fd"
                         });
                 });
 
@@ -253,19 +253,19 @@ namespace OAuthLogin.DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "36a66be9-dc6d-4078-ad11-e314236d81f1",
+                            Id = "22d0f874-6f4a-4451-8212-8c2d905d0ab2",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "895fd5e4-9fc5-4efe-9a6d-09c973155c84",
-                            CreatedDate = new DateTime(2024, 5, 8, 17, 39, 11, 495, DateTimeKind.Local).AddTicks(6175),
+                            ConcurrencyStamp = "dcffdb33-7e81-4d0a-a9a2-f0ecafeb7ea2",
+                            CreatedDate = new DateTime(2024, 5, 10, 13, 5, 4, 684, DateTimeKind.Local).AddTicks(1492),
                             Email = "Admin@example.com",
                             EmailConfirmed = true,
                             IsActivated = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@EXAMPLE.COM",
                             NormalizedUserName = "ADMIN",
-                            PasswordHash = "AQAAAAIAAYagAAAAEMtCIWcCJtZPrDUXP2CAxU27QSyh0Ifa1pSSNILLQgtckbHgR9G4kqi7S8VjHPtvFA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEGtLTQFg0gg76k1WhPliYEgz1asYmhBcnm/Hq+QAmaoMEsvxUxDtenKwMP5hJu9p9g==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "c13841ef-6e12-47dd-a0dc-8272773986eb",
+                            SecurityStamp = "e28ce2c9-bb4c-4693-afde-92267b708d10",
                             TwoFactorEnabled = false,
                             UserName = "admin"
                         });
@@ -279,9 +279,15 @@ namespace OAuthLogin.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("LevelXPath")
+                    b.Property<string>("CreatedById")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastExecuted")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -292,6 +298,8 @@ namespace OAuthLogin.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
 
                     b.ToTable("Jobs");
                 });
@@ -434,6 +442,17 @@ namespace OAuthLogin.DAL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("OAuthLogin.DAL.Models.Job", b =>
+                {
+                    b.HasOne("OAuthLogin.DAL.Models.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
                 });
 
             modelBuilder.Entity("OAuthLogin.DAL.Models.JobParameter", b =>

@@ -1,7 +1,9 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OAuthLogin.BLL.Repositories;
+using OAuthLogin.DAL.Models;
 using OAuthLogin.DAL.ViewModels;
 
 
@@ -13,9 +15,11 @@ namespace OAuthLogin.Controllers
     public class CrawlerController : ControllerBase
     {
         private readonly ICrawlerService _crawlerService;
-        public CrawlerController(ICrawlerService crawlerService)
+        private readonly UserManager<ApplicationUser>  _userManager;
+        public CrawlerController(ICrawlerService crawlerService,UserManager<ApplicationUser> userManager)
         {
             _crawlerService = crawlerService;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -33,7 +37,12 @@ namespace OAuthLogin.Controllers
         [Route("AddJob")]
         public IActionResult AddJob(VMAddCrawlingJob vMAddCrawlingJob)
         {
-            var response = _crawlerService.AddCrawlingJob(vMAddCrawlingJob);
+            var user= _userManager.GetUserId(User);
+            if(user == "")
+            {
+                return StatusCode(500, new Response("User not found.", false));
+            }
+            var response = _crawlerService.AddCrawlingJob(vMAddCrawlingJob,user);
             if (response.IsCompletedSuccessfully)
                 return Ok(new Response("Data Added Successfully!", true));
             else return StatusCode(500, new Response("Something went wrong.", false));

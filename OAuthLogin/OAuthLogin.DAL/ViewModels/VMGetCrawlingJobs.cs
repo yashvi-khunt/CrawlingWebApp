@@ -6,11 +6,13 @@ namespace OAuthLogin.DAL.ViewModels
         public long Id { get; set; }
         public int JobId { get; set; }
         public string? Name { get; set; }
-        //public DateTime? DateTime { get; set; }
-        //public string UserId
-
+        public DateTime? CreatedDate{ get; set; }
+       
         public string? URL{ get; set; }
         public int ResultCount { get; set; }
+
+        public string CreatedBy { get; set; }
+        public string LastExecuted {  get; set; }
     }
 
     public class VMGetCrawlingJobs
@@ -27,7 +29,7 @@ namespace OAuthLogin.DAL.ViewModels
 
         //public string? ToDate { get; set; }
 
-        //public string? UserIds { get; set; }
+        public string? UserIds { get; set; }
     }
 }
 

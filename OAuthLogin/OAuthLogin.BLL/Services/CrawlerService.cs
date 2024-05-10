@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OAuthLogin.BLL.Repositories;
 using OAuthLogin.BLL.SQLRepository;
@@ -12,21 +13,25 @@ namespace OAuthLogin.BLL.Services
 {
     public class CrawlerService : ICrawlerService
     {
+
         private readonly OAuthDbContext _context;
         private readonly IProcedureManager _procedureManager;
         public CrawlerService(OAuthDbContext dbContext, IProcedureManager procedureManager)
         {
             _context = dbContext;
             _procedureManager = procedureManager;
+            
         }
 
-        public Task<Job> AddCrawlingJob(VMAddCrawlingJob vMAddCrawlingJob)
+        public Task<Job> AddCrawlingJob(VMAddCrawlingJob vMAddCrawlingJob, string userId)
         {
+            
             var newJob = new Job
             {
                 Name = vMAddCrawlingJob.JobName,
                 URL = vMAddCrawlingJob.URL,
-                LevelXPath = ""
+                CreatedById = userId,
+                CreatedDate = DateTime.Now,
             };
             _context.Jobs.Add(newJob);
 
@@ -107,6 +112,11 @@ namespace OAuthLogin.BLL.Services
         {
             Console.WriteLine("Start....GetData");
             var job = _context.Jobs.Where(j => j.Id == JobId).FirstOrDefault();
+
+            job.LastExecuted = DateTime.Now;
+            _context.Jobs.Update(job);
+            _context.SaveChanges();
+
             var jobParams = _context.JobParameters.Where(p => p.JobId == job.Id && p.IsLevelParameter == false).ToList();
 
             // to open chrome in headless mode

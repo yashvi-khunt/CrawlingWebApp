@@ -66,6 +66,9 @@ declare namespace ApiTypes {
     name: string;
     url: string;
     resultCount: number;
+    createdBy: string;
+    createdDate: string;
+    lastExecuted: string;
   };
 
   type GetCrawlingJobProps = Omit<Global.apiResponse, "data"> & {

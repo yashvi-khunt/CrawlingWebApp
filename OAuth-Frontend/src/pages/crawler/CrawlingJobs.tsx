@@ -2,6 +2,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import Table from "../../components/dynamicTable/DynamicTable";
 import { useGetCrawlingJobsQuery } from "../../redux/api/crawlingJobApi";
 import { TableColumn } from "react-data-table-component";
+import dayjs from "dayjs";
 
 function CrawlingJobs() {
   const navigate = useNavigate();
@@ -18,12 +19,6 @@ function CrawlingJobs() {
       sortField: "name",
       width: "150px",
     },
-    // {
-    //   name: "Date",
-    //   selector: (row) => dayjs(row.dateTime).format("DD/MM/YYYY hh:mm A"),
-    //   sortable: true,
-    //   sortField: "date",
-    // },
     {
       name: "URL",
       selector: (row) => row.url,
@@ -43,6 +38,24 @@ function CrawlingJobs() {
       sortable: true,
       sortField: "resultCount",
       width: "150px",
+    },
+    {
+      name: "Created By",
+      selector: (row) => row.createdBy,
+      sortable: true,
+      sortField: "createdBy",
+    },
+    {
+      name: "Created Date",
+      selector: (row) => dayjs(row.createdDate).format("DD/MM/YYYY hh:mm A"),
+      sortable: true,
+      sortField: "createdDate",
+    },
+    {
+      name: "Last Executed",
+      selector: (row) => dayjs(row.lastExecuted).format("DD/MM/YYYY hh:mm A"),
+      sortable: true,
+      sortField: "lastExecuted",
     },
     {
       name: "Action",

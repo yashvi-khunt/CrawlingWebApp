@@ -13,7 +13,7 @@ GO
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE [dbo].[usp_Get_Crawling_Jobs] 
+ALTER PROCEDURE [dbo].[usp_Get_Crawling_Jobs] 
 	-- Add the parameters for the stored procedure here
 	@Field NVARCHAR(50) = 'date', --code
     @Sort NVARCHAR(50) = 'desc', -- asc
@@ -30,11 +30,12 @@ DROP TABLE IF EXISTS #tempCrawlingJobs
     -- Insert statements for procedure here
 	SELECT j.Id,max(jr.ParamOrder) as ResultCount INTO #tempCrawlingJobs
 	FROM Jobs j
-	--inner join AspNetUsers
-	--WHERE
-	inner join JobParameters jp on jp.JobId = j.Id
-	inner join JobResponses jr on jr.JobParameterId = jp.Id
+	left join JobParameters jp on jp.JobId = j.Id
+	left join JobResponses jr on jr.JobParameterId = jp.Id
+
 	GROUP BY J.Id
+
+	
 
 	 -- It returns number of users after applying filters.
    SELECT Count(*) AS count FROM #tempCrawlingJobs
@@ -47,12 +48,18 @@ DROP TABLE IF EXISTS #tempCrawlingJobs
      --CASE WHEN @Field = 'date' AND @Sort = 'asc' THEN lh.datetime END ASC,
      --CASE WHEN @Field = 'date' AND @Sort = 'desc' THEN lh.datetime END DESC,
 	 CASE WHEN @Field = 'resultCount' AND @Sort = 'asc' THEN tcj.ResultCount END ASC,
-     CASE WHEN @Field = 'resultCount' AND @Sort = 'desc' THEN tcj.ResultCount END DESC
+     CASE WHEN @Field = 'resultCount' AND @Sort = 'desc' THEN tcj.ResultCount END DESC,
+	  CASE WHEN @Field = 'createdBy' AND @Sort = 'asc' THEN a.Email END ASC,
+     CASE WHEN @Field = 'createdBy' AND @Sort = 'desc' THEN a.Email END DESC,
+	  CASE WHEN @Field = 'createdDate' AND @Sort = 'asc' THEN j.CreatedDate END ASC,
+     CASE WHEN @Field = 'createdDate' AND @Sort = 'desc' THEN j.CreatedDate END DESC,
+	  CASE WHEN @Field = 'lastExecuted' AND @Sort = 'asc' THEN j.LastExecuted END ASC,
+     CASE WHEN @Field = 'lastExecuted' AND @Sort = 'desc' THEN j.LastExecuted END DESC
      )
      AS Id ,
-	 j.Id AS JobId,j.Name,j.URL,ResultCount
+	 j.Id AS JobId,j.Name,j.URL,ResultCount,a.Email as CreatedBy,j.CreatedDate,j.LastExecuted
 	 FROM Jobs j
-	 --INNER JOIN AspnetUsers a ON a.Id = j.UserId
+	 INNER JOIN AspnetUsers a ON a.Id = j.CreatedById
 	 Left JOIN #tempCrawlingJobs tcj ON tcj.Id = j.Id	
 
 	 order by Id
@@ -61,4 +68,4 @@ DROP TABLE IF EXISTS #tempCrawlingJobs
 
 END
 GO
-
+exec usp_Get_Crawling_Jobs
