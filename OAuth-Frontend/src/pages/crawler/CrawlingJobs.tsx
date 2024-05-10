@@ -63,7 +63,10 @@ function CrawlingJobs() {
         <>
           <div className="row">
             <a className="btn" href={`/crawling-jobs/details/${row.jobId}`}>
-              View Response
+              <i
+                className="fa fa-info-circle text-info"
+                style={{ fontSize: "large" }}
+              ></i>
             </a>
           </div>
         </>

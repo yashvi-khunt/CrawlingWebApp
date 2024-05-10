@@ -18,7 +18,6 @@ function JobResponse() {
                 <h1>Crawling Job Response</h1>
               </div>
               <div>
-                {" "}
                 <button
                   onClick={() => navigate("/crawling-jobs")}
                   className="btn btn-primary float-sm-right"
@@ -32,30 +31,28 @@ function JobResponse() {
         <section className="content">
           {response && response?.length > 0 ? (
             response?.map((job) => (
-              <>
-                <div className="card">
-                  <div className="card-header">Result : {job.paramOrder}</div>
-                  <div className="card-body">
-                    <table>
-                      {job.data.map((data) => (
-                        <>
-                          <tr>
-                            <td>{data.parameterName}</td>
-                            <td>&nbsp;:&nbsp;</td>
-                            <td>
-                              {data.parameterName === "nextURL" ? (
-                                <a href={data.value}>{data.value}</a>
-                              ) : (
-                                data.value || "-"
-                              )}
-                            </td>
-                          </tr>
-                        </>
-                      ))}
-                    </table>
-                  </div>
+              <div className="card" key={job.paramOrder}>
+                <div className="card-header">Result : {job.paramOrder}</div>
+                <div className="card-body">
+                  <table>
+                    {job.data.map((data) => (
+                      <tbody key={data.parameterName}>
+                        <tr>
+                          <td>{data.parameterName}</td>
+                          <td>&nbsp;:&nbsp;</td>
+                          <td>
+                            {data.parameterName === "nextURL" ? (
+                              <a href={data.value}>{data.value}</a>
+                            ) : (
+                              data.value || "-"
+                            )}
+                          </td>
+                        </tr>
+                      </tbody>
+                    ))}
+                  </table>
                 </div>
-              </>
+              </div>
             ))
           ) : (
             <div className="card">

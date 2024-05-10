@@ -2,9 +2,11 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Header, SideBar } from "../index";
 import { useAppSelector } from "../../redux/hooks";
 import { useEffect } from "react";
+import { Fade, Box, Fab } from "@mui/material";
+import useScrollToTop from "../../hooks/useScrollToTop";
 
 const Layout = () => {
-  // const { isVisible, handleClick } = useScrollToTop();
+  const { isVisible, handleClick } = useScrollToTop();
   const location = useLocation();
   const isAuth = location.pathname.includes("/auth");
   const isLoggedIn = useAppSelector((state) => state.auth.status);
@@ -34,17 +36,17 @@ const Layout = () => {
           </>
         )}
 
-        {/* <Fade in={isVisible}>
+        <Fade in={isVisible}>
           <Box
             onClick={handleClick}
             role="presentation"
             sx={{ position: "fixed", bottom: 16, right: 16 }}
           >
             <Fab size="small" aria-label="scroll back to top">
-              <KeyboardArrowUpIcon />
+              <i className="fa fa-chevron-up" />
             </Fab>
           </Box>
-        </Fade> */}
+        </Fade>
       </div>
     </>
   );

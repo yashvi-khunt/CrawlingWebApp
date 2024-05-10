@@ -44,7 +44,10 @@ namespace OAuthLogin.Controllers
             }
             var response = _crawlerService.AddCrawlingJob(vMAddCrawlingJob,user);
             if (response.IsCompletedSuccessfully)
+            {
+                IActionResult getDataResult = GetData(response.Result.Id);
                 return Ok(new Response("Data Added Successfully!", true));
+            }
             else return StatusCode(500, new Response("Something went wrong.", false));
         }
 

@@ -12,7 +12,7 @@ namespace OAuthLogin.DAL.ViewModels
         public int ResultCount { get; set; }
 
         public string CreatedBy { get; set; }
-        public string LastExecuted {  get; set; }
+        public DateTime? LastExecuted {  get; set; }
     }
 
     public class VMGetCrawlingJobs
