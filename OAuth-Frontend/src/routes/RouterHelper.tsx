@@ -13,9 +13,10 @@ import {
   EmailConfirmSuccess,
   SendEmail,
   Login,
+  CrawlingJobs,
+  AddNewJob,
+  JobResponse,
 } from "../pages";
-import AddNewJob from "../pages/crawler/AddNewJob";
-import CrawlingJobs from "../pages/crawler/CrawlingJobs";
 
 export const routerHelper: Global.RouteConfig = [
   {
@@ -93,6 +94,11 @@ export const routerHelper: Global.RouteConfig = [
       {
         path: "add",
         element: <AddNewJob />,
+        roles: ["Admin", "User"],
+      },
+      {
+        path: "details/:jobId",
+        element: <JobResponse />,
         roles: ["Admin", "User"],
       },
     ],

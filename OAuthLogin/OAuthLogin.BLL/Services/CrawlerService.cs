@@ -68,8 +68,10 @@ namespace OAuthLogin.BLL.Services
         }
 
         public Task<List<VMJobResponseForJobId>> GetResponseForJobId(int JobId)
+
         {
-            var response = _procedureManager.ExecStoreProcedureMulResults<StoredProcedureCommonModel, VMSPJobResponse>(StoredProcedure.GetResponseForJobId, JobId);
+            VMJobResponseInputModel spParam = new VMJobResponseInputModel { JobId = JobId };
+            var response = _procedureManager.ExecStoreProcedureMulResults<StoredProcedureCommonModel, VMSPJobResponse>(StoredProcedure.GetResponseForJobId,spParam);
 
             var totalJobs = response.Item1[0].Count;
             var responseData = response.Item2;

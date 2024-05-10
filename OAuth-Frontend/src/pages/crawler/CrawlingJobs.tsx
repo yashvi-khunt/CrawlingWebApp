@@ -41,9 +41,14 @@ function CrawlingJobs() {
       name: "Action",
       selector: (row) => (
         <>
-          <a href={row.url} target="_blank">
-            Visit site
-          </a>
+          <div className="row">
+            <a className="btn" href={row.url} target="_blank">
+              Visit site
+            </a>
+            <a className="btn" href={`/crawling-jobs/details/${row.jobId}`}>
+              View Response
+            </a>
+          </div>
         </>
       ),
     },

@@ -13,7 +13,7 @@ GO
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE [dbo].[usp_Get_Respone_For_JobId]
+Alter PROCEDURE [dbo].[usp_Get_Respone_For_JobId]
 -- Add the parameters for the stored procedure here
 	@JobId int  
 AS
@@ -28,11 +28,12 @@ BEGIN
 	where JobId = @JobId
 
     -- Insert statements for procedure here
+	
 	select ParameterName,Value,ParamOrder from JobResponses jr
 		inner join JobParameters jp
 		on jr.JobParameterId = jp.Id
 		where JobId = @JobId
-		order by ParamOrder
+		order by ParamOrder,JobParameterId
 END
 GO
 

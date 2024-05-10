@@ -70,9 +70,14 @@ namespace OAuthLogin.Controllers
         }
 
         [HttpGet("GetResponseForJobId/{JobId}")]
-        public IActionResult<List<VMJobResponseForJobId>> GetJobsForId(int JobId)
+        public async Task<IActionResult> GetJobsForId(int JobId)
         {
-
+            var response = await _crawlerService.GetResponseForJobId(JobId);
+            if(response != null)
+            {
+                return Ok(new Response<List<VMJobResponseForJobId>>(response,true,"Data loaded successfully!"));
+            }
+            else { return StatusCode(500, new Response("Something went wrong!", false)); }
         }
     }
 }

@@ -74,4 +74,18 @@ declare namespace ApiTypes {
       crawlingJobs: CrawlingJobProps[];
     };
   };
+
+  type GetCrawlingJobResponse = Omit<Global.apiResponse, "data"> & {
+    data: [
+      {
+        paramOrder: number;
+        data: [
+          {
+            parameterName: string;
+            value: string;
+          }
+        ];
+      }
+    ];
+  };
 }

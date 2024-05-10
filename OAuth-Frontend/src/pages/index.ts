@@ -13,3 +13,6 @@ export { default as LoginHistories } from "./loginHistories/LoginHistories";
 export { default as SendEmail } from "./auth/SendEmail";
 export { default as SetPassword } from "./auth/SetPassword";
 export { default as Users } from "./users/Users";
+export { default as AddNewJob } from "./crawler/AddNewJob";
+export { default as CrawlingJobs } from "./crawler/CrawlingJobs";
+export { default as JobResponse } from "./crawler/JobResponse";

@@ -23,4 +23,9 @@ namespace OAuthLogin.DAL.ViewModels
         public string Value { get; set; }
         public int ParamOrder { get; set; }
     }
+
+    public class VMJobResponseInputModel
+    {
+        public int JobId { get; set; }
+    }
 }

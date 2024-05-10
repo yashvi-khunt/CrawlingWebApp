@@ -23,8 +23,21 @@ export const crawlingJobApi = indexApi.injectEndpoints({
       }),
       providesTags: ["CrawlingJob"],
     }),
+    getCrawlingJobResponse: builder.query<
+      ApiTypes.GetCrawlingJobResponse,
+      number
+    >({
+      query: (data) => ({
+        url: `Crawler/GetResponseForJobId/${data}`,
+        method: "GET",
+      }),
+      providesTags: ["CrawlingJob"],
+    }),
   }),
 });
 
-export const { useAddCrawlingJobMutation, useGetCrawlingJobsQuery } =
-  crawlingJobApi;
+export const {
+  useAddCrawlingJobMutation,
+  useGetCrawlingJobsQuery,
+  useGetCrawlingJobResponseQuery,
+} = crawlingJobApi;
