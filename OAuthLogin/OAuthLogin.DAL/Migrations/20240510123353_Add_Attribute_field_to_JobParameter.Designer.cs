@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OAuthLogin.DAL.Helper;
 
@@ -11,9 +12,11 @@ using OAuthLogin.DAL.Helper;
 namespace OAuthLogin.DAL.Migrations
 {
     [DbContext(typeof(OAuthDbContext))]
-    partial class OAuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240510123353_Add_Attribute_field_to_JobParameter")]
+    partial class Add_Attribute_field_to_JobParameter
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

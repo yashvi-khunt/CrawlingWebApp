@@ -24,11 +24,18 @@ namespace OAuthLogin.Controllers
 
         [HttpGet]
         [Route("GetData/{jobId}")]
+        //public IActionResult GetData(int jobId)
+        //{
+
+        //    // Add or update the recurring job with the unique cron expression
+        //    RecurringJob.AddOrUpdate<ICrawlerService>($"Job{jobId}", x => x.TriggerJob(jobId), Cron.MinuteInterval(5));
+        //    return Ok(new Response("Data loading scheduled successfully!", true));
+        //}
         public IActionResult GetData(int jobId)
         {
+            //await _crawlerService.TriggerJob(jobId);
 
-            // Add or update the recurring job with the unique cron expression
-            RecurringJob.AddOrUpdate<ICrawlerService>($"Job{jobId}", x => x.TriggerJob(jobId), Cron.MinuteInterval(5));
+            RecurringJob.AddOrUpdate<ICrawlerService>($"Job{jobId}", x => x.TriggerJob(jobId), Cron.Daily(1));
             return Ok(new Response("Data loading scheduled successfully!", true));
         }
 

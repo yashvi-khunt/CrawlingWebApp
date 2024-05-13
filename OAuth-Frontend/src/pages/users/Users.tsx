@@ -34,6 +34,12 @@ function Users() {
 
   const columns = [
     {
+      name: "Email",
+      selector: (row) => row.email,
+      sortable: true,
+      sortField: "email",
+    },
+    {
       name: "First Name",
       selector: (row) => row.firstName || "-",
       sortable: true,
@@ -44,12 +50,6 @@ function Users() {
       selector: (row) => row.lastName || "-",
       sortable: true,
       sortField: "lastName",
-    },
-    {
-      name: "Email",
-      selector: (row) => row.email,
-      sortable: true,
-      sortField: "email",
     },
     { name: "Role", selector: (row) => row.role },
     {

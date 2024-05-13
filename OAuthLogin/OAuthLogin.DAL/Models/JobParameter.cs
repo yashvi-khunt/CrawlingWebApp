@@ -12,6 +12,7 @@ namespace OAuthLogin.DAL.Models
        
         public string ParameterName { get; set; }
         public string XPath { get; set; }
+        public string Attribute {  get; set; }
         public bool IsLevelParameter { get; set; }
         public virtual Job Job{ get; set; } = null!;
     }

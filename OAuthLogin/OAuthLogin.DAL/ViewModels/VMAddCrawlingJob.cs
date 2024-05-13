@@ -5,6 +5,8 @@ namespace OAuthLogin.DAL.ViewModels
     {
         public string Param { get; set; }
         public string Xpath { get; set; }
+
+        public string? Attribute { get; set; } = "textContent";
         public bool IsLevelParam { get; set; } 
     }
     public class VMAddCrawlingJob

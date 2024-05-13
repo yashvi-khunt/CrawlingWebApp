@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAddCrawlingJobMutation } from "../../redux/api/crawlingJobApi";
 import { openSnackbar } from "../../redux/slice/snackbarSlice";
 import { useAppDispatch } from "../../redux/hooks";
+import ParameterCard from "./ParameterCard";
 
 function AddNewJob() {
   const navigate = useNavigate();
@@ -16,8 +17,9 @@ function AddNewJob() {
   const [showLevelParams, setShowLevelParams] = useState(false);
 
   const [baseParams, setBaseParams] = useState([{ param: "", xpath: "" }]);
-  const [nextUrl, setNextUrl] = useState("");
   const [levelParams, setLevelParams] = useState([]);
+
+  const [nextUrl, setNextUrl] = useState("");
 
   const [addJob, { data, error: addJobError }] = useAddCrawlingJobMutation();
 
@@ -59,6 +61,7 @@ function AddNewJob() {
         {
           param: "nextURL",
           xpath: nextUrl,
+          attribute: "href",
           isLevelParam: false,
         },
       ];
@@ -121,9 +124,10 @@ function AddNewJob() {
           </div>
         </section>
         <section className="content">
-          <div className="card card-primary">
-            <div className="card-body">
-              <form onSubmit={handleSubmit(onSubmit)}>
+          {/* <div className="card card-primary"> */}
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="card card-primary">
+              <div className="card-body">
                 <div className="row">
                   <div className="form-group col-12 col-md-6">
                     <label htmlFor="jobName">Job Name</label>
@@ -168,100 +172,19 @@ function AddNewJob() {
                     )}
                   </div>
                 </div>
-                <div className="row ">
-                  <div className="col-12">
-                    <label
-                      className="btn"
-                      style={{ margin: 0, padding: 0, cursor: "default" }}
-                    >
-                      Parameters and their Xpaths
-                    </label>
-                    <button
-                      type="button"
-                      className="btn"
-                      onClick={() =>
-                        setBaseParams((prev) => [
-                          ...prev,
-                          { param: "", xpath: "" },
-                        ])
-                      }
-                    >
-                      <i className="fa fa-circle-plus"></i>
-                    </button>
-                  </div>
-                </div>
-                {baseParams.map((param, index) => (
-                  <div className="row" key={index}>
-                    <label
-                      className="form-group col-6 col-md-2"
-                      htmlFor={`param${index}`}
-                    >
-                      Parameter:
-                    </label>
-                    <div className="form-group col-6 col-md-2 ">
-                      <input
-                        className="form-control"
-                        type="text"
-                        id={`param${index}`}
-                        value={param.param}
-                        {...register(`param${index}`, {
-                          required: "Parameter name is required",
-                        })}
-                        onChange={(e) =>
-                          handleInputChange(
-                            index,
-                            "param",
-                            e.target.value,
-                            false
-                          )
-                        }
-                      />
-                      {errors[`param${index}`] && (
-                        <span className="error invalid-feedback">
-                          {errors[`param${index}`].message}
-                        </span>
-                      )}
-                    </div>
-                    <label
-                      className="form-group col-6 col-md-2"
-                      htmlFor={`xpath${index}`}
-                    >
-                      Xpath:
-                    </label>
-                    <div className="form-group col-6 col-md-2 ">
-                      <input
-                        className="form-control "
-                        type="text"
-                        id={`xpath${index}`}
-                        value={param.xpath}
-                        {...register(`xpath${index}`, {
-                          required: "Xpath is required",
-                        })}
-                        onChange={(e) =>
-                          handleInputChange(
-                            index,
-                            "xpath",
-                            e.target.value,
-                            false
-                          )
-                        }
-                      />
-                      {errors[`xpath${index}`] && (
-                        <span className="error invalid-feedback">
-                          {errors[`xpath${index}`].message}
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      className="btn form-control col-md-2 "
-                      onClick={() => handleRemoveIndex(index, false)}
-                    >
-                      <i className="fa fa-circle-minus"></i>
-                    </button>
-                  </div>
-                ))}
-
+              </div>
+            </div>
+            <ParameterCard
+              params={baseParams}
+              setParams={setBaseParams}
+              handleInputChange={handleInputChange}
+              handleRemoveIndex={handleRemoveIndex}
+              register={register}
+              errors={errors}
+              prefix=""
+            />
+            <div className="card card-primary">
+              <div className="card-body">
                 <div className="row ">
                   <label className="col-2" htmlFor="nextUrl">
                     Next URL Xpath
@@ -288,115 +211,28 @@ function AddNewJob() {
                     )}
                   </div>
                 </div>
-
-                {showLevelParams && (
-                  <>
-                    <div className="row ">
-                      <div className="col-12">
-                        <label
-                          className="btn"
-                          style={{ margin: 0, padding: 0, cursor: "default" }}
-                        >
-                          Level Parameters and their Xpaths
-                        </label>
-                        <button
-                          type="button"
-                          className="btn"
-                          onClick={() =>
-                            setLevelParams((prev) => [
-                              ...prev,
-                              { param: "", xpath: "" },
-                            ])
-                          }
-                        >
-                          <i className="fa fa-circle-plus"></i>
-                        </button>
-                      </div>
-                    </div>
-
-                    {levelParams.map((param, index) => (
-                      <div className="row" key={index}>
-                        <label
-                          className="form-group col-6 col-md-2"
-                          htmlFor={`lparam${index}`}
-                        >
-                          Parameter:
-                        </label>
-                        <div className="form-group col-6 col-md-2 ">
-                          <input
-                            className="form-control "
-                            type="text"
-                            id={`lparam${index}`}
-                            {...register(`lparam${index}`, {
-                              required: "Parameter name is required",
-                            })}
-                            value={param.param}
-                            onChange={(e) =>
-                              handleInputChange(
-                                index,
-                                "param",
-                                e.target.value,
-                                true
-                              )
-                            }
-                          />
-
-                          {errors[`lparam${index}`] && (
-                            <span className="error invalid-feedback">
-                              {errors[`lparam${index}`].message}
-                            </span>
-                          )}
-                        </div>
-                        <label
-                          className="form-group col-6 col-md-2"
-                          htmlFor={`lxpath${index}`}
-                        >
-                          Xpath:
-                        </label>
-                        <div className="form-group col-6 col-md-2 ">
-                          <input
-                            className="form-control "
-                            type="text"
-                            id={`lxpath${index}`}
-                            {...register(`lxpath${index}`, {
-                              required: "Xpath is required",
-                            })}
-                            value={param.xpath}
-                            onChange={(e) =>
-                              handleInputChange(
-                                index,
-                                "xpath",
-                                e.target.value,
-                                true
-                              )
-                            }
-                          />
-                          {errors[`lxpath${index}`] && (
-                            <span className="error invalid-feedback">
-                              {errors[`lxpath${index}`].message}
-                            </span>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          className="btn form-control col-md-2 "
-                          onClick={() => handleRemoveIndex(index, true)}
-                        >
-                          <i className="fa fa-circle-minus"></i>
-                        </button>
-                      </div>
-                    ))}
-                  </>
-                )}
-                <button type="submit" className="btn btn-primary mt-3">
-                  Add
-                </button>
-                <a href="/crawling-jobs" className="btn btn-link mt-3">
-                  Cancel
-                </a>
-              </form>
+              </div>
             </div>
-          </div>
+            {showLevelParams && (
+              <ParameterCard
+                params={levelParams}
+                setParams={setLevelParams}
+                handleInputChange={handleInputChange}
+                handleRemoveIndex={handleRemoveIndex}
+                register={register}
+                errors={errors}
+                prefix="Level"
+              />
+            )}
+
+            <button type="submit" className="btn btn-primary mt-3">
+              Add
+            </button>
+            <a href="/crawling-jobs" className="btn btn-link mt-3">
+              Cancel
+            </a>
+          </form>
+          {/* </div> */}
         </section>
       </div>
     </>

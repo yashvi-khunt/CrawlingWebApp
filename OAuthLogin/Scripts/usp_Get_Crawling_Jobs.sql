@@ -69,3 +69,5 @@ DROP TABLE IF EXISTS #tempCrawlingJobs
 END
 GO
 exec usp_Get_Crawling_Jobs
+
+select * from AspNetUsers

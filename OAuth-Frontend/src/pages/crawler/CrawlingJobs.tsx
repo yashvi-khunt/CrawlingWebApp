@@ -53,7 +53,10 @@ function CrawlingJobs() {
     },
     {
       name: "Last Executed",
-      selector: (row) => dayjs(row.lastExecuted).format("DD/MM/YYYY hh:mm A"),
+      selector: (row) =>
+        row.lastExecuted
+          ? dayjs(row.lastExecuted).format("DD/MM/YYYY hh:mm A")
+          : "-",
       sortable: true,
       sortField: "lastExecuted",
     },

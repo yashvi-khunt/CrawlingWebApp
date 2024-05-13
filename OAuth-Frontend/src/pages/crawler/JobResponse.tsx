@@ -41,8 +41,10 @@ function JobResponse() {
                           <td>{data.parameterName}</td>
                           <td>&nbsp;:&nbsp;</td>
                           <td>
-                            {data.parameterName === "nextURL" ? (
-                              <a href={data.value}>{data.value}</a>
+                            {data.value.startsWith("http") ? (
+                              <a href={data.value} target="_blank">
+                                {data.value}
+                              </a>
                             ) : (
                               data.value || "-"
                             )}

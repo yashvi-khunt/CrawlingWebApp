@@ -1,6 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using OAuthLogin.BLL.Repositories;
 using OAuthLogin.BLL.SQLRepository;
 using OAuthLogin.DAL.Helper;
@@ -43,6 +41,7 @@ namespace OAuthLogin.BLL.Services
                 {
                     ParameterName = item.Param,
                     XPath = item.Xpath,
+                    Attribute = item.Attribute,
                     IsLevelParameter = item.IsLevelParam,
                     JobId = newJob.Id,
                 };
@@ -105,7 +104,8 @@ namespace OAuthLogin.BLL.Services
         public async Task TriggerJob(int jobId)
         {
             await GetData(jobId);
-            GetDetailsData(jobId);
+             GetDetailsData(jobId);
+            return;
         }
 
         public Task GetData(int JobId)
@@ -144,15 +144,15 @@ namespace OAuthLogin.BLL.Services
 
                         if (existingJobResponse != null)
                         {
-                            existingJobResponse.Value = param.ParameterName != "nextURL" ? result.Text : result.GetAttribute("href");
+                            existingJobResponse.Value = result.GetAttribute(param.Attribute) ?? "";
                         }
                         else
                         {
                             var jobResponse = new JobResponse()
                             {
                                 JobParameterId = param.Id,
-                                Value = param.ParameterName != "nextURL" ? result.Text : result.GetAttribute("href"),
-                                ParamOrder = count,
+                                Value = result.GetAttribute(param.Attribute)  ?? "",
+                            ParamOrder = count,
                             };
 
                             _context.JobResponses.Add(jobResponse);
@@ -196,7 +196,7 @@ namespace OAuthLogin.BLL.Services
                         var result = string.Empty;
                         try
                         {
-                            result = driver.FindElement(By.XPath(param.XPath)).GetAttribute("textContent") ?? "";
+                            result = driver.FindElement(By.XPath(param.XPath)).GetAttribute(param.Attribute) ?? "";
                         }
                         catch (NoSuchElementException ex)
                         {
@@ -207,14 +207,14 @@ namespace OAuthLogin.BLL.Services
                         var existingJobResponse = _context.JobResponses.FirstOrDefault(jr => jr.JobParameterId == param.Id && jr.ParamOrder == job.ParamOrder);
                         if (existingJobResponse != null)
                         {
-                            existingJobResponse.Value = result;
+                            existingJobResponse.Value = result ?? "";
                         }
                         else
                         {
                             var jobResponse = new JobResponse()
                             {
                                 JobParameterId = param.Id,
-                                Value = result,
+                                Value = result ?? "",
                                 ParamOrder = job.ParamOrder,
                             };
 
