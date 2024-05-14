@@ -69,6 +69,7 @@ declare namespace ApiTypes {
     createdBy: string;
     createdDate: string;
     lastExecuted: string;
+    recJob: number | null;
   };
 
   type GetCrawlingJobProps = Omit<Global.apiResponse, "data"> & {
@@ -86,6 +87,7 @@ declare namespace ApiTypes {
           {
             parameterName: string;
             value: string;
+            attribute: string;
           }
         ];
       }

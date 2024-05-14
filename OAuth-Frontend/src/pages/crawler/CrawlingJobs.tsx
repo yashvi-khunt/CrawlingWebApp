@@ -1,8 +1,14 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Table from "../../components/dynamicTable/DynamicTable";
-import { useGetCrawlingJobsQuery } from "../../redux/api/crawlingJobApi";
+import {
+  useGetCrawlingJobsQuery,
+  useTriggerJobMutation,
+} from "../../redux/api/crawlingJobApi";
 import { TableColumn } from "react-data-table-component";
 import dayjs from "dayjs";
+import { useEffect } from "react";
+import { openSnackbar } from "../../redux/slice/snackbarSlice";
+import { useAppDispatch } from "../../redux/hooks";
 
 function CrawlingJobs() {
   const navigate = useNavigate();
@@ -10,6 +16,26 @@ function CrawlingJobs() {
   const { data } = useGetCrawlingJobsQuery({
     ...Object.fromEntries(searchParams.entries()),
   });
+  const dispatch = useAppDispatch();
+  const [trigger, { data: triggerRes }] = useTriggerJobMutation();
+
+  const handleTrigger = (jobId: number, isTrigger: boolean) => {
+    if (isTrigger) {
+      console.log("trigger", jobId);
+      trigger(jobId);
+    }
+  };
+
+  useEffect(() => {
+    if (triggerRes?.success) {
+      dispatch(
+        openSnackbar({
+          severity: "success",
+          message: triggerRes?.message,
+        })
+      );
+    }
+  }, [triggerRes]);
 
   const columns: TableColumn<ApiTypes.CrawlingJobProps>[] = [
     {
@@ -67,10 +93,20 @@ function CrawlingJobs() {
           <div className="row">
             <a className="btn" href={`/crawling-jobs/details/${row.jobId}`}>
               <i
-                className="fa fa-info-circle text-info"
+                className="fa fa-info-circle text-primary"
                 style={{ fontSize: "large" }}
               ></i>
             </a>
+            {row.recJob === 0 ? (
+              <button
+                className="btn"
+                onClick={() =>
+                  handleTrigger(row.jobId, row.recJob === 0 ? true : false)
+                }
+              >
+                <i className="fa-solid fa-circle-play text-success"></i>
+              </button>
+            ) : null}
           </div>
         </>
       ),

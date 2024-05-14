@@ -33,6 +33,13 @@ export const crawlingJobApi = indexApi.injectEndpoints({
       }),
       providesTags: ["CrawlingJob"],
     }),
+    triggerJob: builder.mutation<authTypes.apiResponse, number>({
+      query: (data) => ({
+        url: `Crawler/GetData/${data}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["CrawlingJob"],
+    }),
   }),
 });
 
@@ -40,4 +47,5 @@ export const {
   useAddCrawlingJobMutation,
   useGetCrawlingJobsQuery,
   useGetCrawlingJobResponseQuery,
+  useTriggerJobMutation,
 } = crawlingJobApi;

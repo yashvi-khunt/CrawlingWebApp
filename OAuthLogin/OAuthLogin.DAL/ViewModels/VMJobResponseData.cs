@@ -7,6 +7,7 @@ namespace OAuthLogin.DAL.ViewModels
     {
         public string ParameterName { get; set; }
         public string Value { get; set; }
+        public string Attribute { get; set; }
        
     }
 
@@ -22,6 +23,7 @@ namespace OAuthLogin.DAL.ViewModels
 
         public string Value { get; set; }
         public int ParamOrder { get; set; }
+        public string Attribute { get;set; }
     }
 
     public class VMJobResponseInputModel

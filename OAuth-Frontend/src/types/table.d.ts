@@ -13,8 +13,12 @@ declare namespace DynamicTable {
   type TableProps = {
     columns?:
       | import("react-data-table-component").TableColumn<ApiTypes.userListProps>[]
-      | import("react-data-table-component").TableColumn<ApiTypes.loginHistoriesProps>[];
-    rows?: ApiTypes.userListProps[] | ApiTypes.loginHistoriesProps[];
+      | import("react-data-table-component").TableColumn<ApiTypes.loginHistoriesProps>[]
+      | import("react-data-table-component").TableColumn<ApiTypes.CrawlingJobProps>[];
+    rows?:
+      | ApiTypes.userListProps[]
+      | ApiTypes.loginHistoriesProps
+      | ApiTypes.CrawlingJobProps[];
     rowCount?: number;
   };
 }

@@ -23,7 +23,7 @@ namespace OAuthLogin.BLL.Services
 
         public Task<Job> AddCrawlingJob(VMAddCrawlingJob vMAddCrawlingJob, string userId)
         {
-            
+            // Add job to Job Table
             var newJob = new Job
             {
                 Name = vMAddCrawlingJob.JobName,
@@ -35,6 +35,8 @@ namespace OAuthLogin.BLL.Services
 
             _context.SaveChanges();
 
+
+            //Add job Parameters to JobParameter Table
             foreach (var item in vMAddCrawlingJob.Parameters)
             {
                 var param = new JobParameter
@@ -54,8 +56,7 @@ namespace OAuthLogin.BLL.Services
 
         public Task<VMGetCrawlingJobs> GetAllCrawlingJobs(VMGetCrawlingJobsInput vMGetCrawlingJobsInput)
         {
-
-
+            
             var crawlingJobs = _procedureManager.ExecStoreProcedureMulResults<StoredProcedureCommonModel, VMSpGetCrawlingJobs>(StoredProcedure.GetCrawlingJobs, vMGetCrawlingJobsInput);
 
             var countData = crawlingJobs.Item1[0].Count;
@@ -74,9 +75,11 @@ namespace OAuthLogin.BLL.Services
         public Task<List<VMJobResponseForJobId>> GetResponseForJobId(int JobId)
 
         {
+            //sp call
             VMJobResponseInputModel spParam = new VMJobResponseInputModel { JobId = JobId };
             var response = _procedureManager.ExecStoreProcedureMulResults<StoredProcedureCommonModel, VMSPJobResponse>(StoredProcedure.GetResponseForJobId,spParam);
 
+            // sp response
             var totalJobs = response.Item1[0].Count;
             var responseData = response.Item2;
             List<VMJobResponseForJobId> jobResponse = new List<VMJobResponseForJobId>();
@@ -92,6 +95,7 @@ namespace OAuthLogin.BLL.Services
                     {
                         ParameterName = job.ParameterName,
                         Value = job.Value,
+                        Attribute = job.Attribute,
                     });
                 }
                 jobResponse.Add(new VMJobResponseForJobId { ParamOrder = count,Data=responseList});
@@ -110,13 +114,15 @@ namespace OAuthLogin.BLL.Services
 
         public Task GetData(int JobId)
         {
-            Console.WriteLine("Start....GetData");
+            //find job
             var job = _context.Jobs.Where(j => j.Id == JobId).FirstOrDefault();
 
+            //update last executed time
             job.LastExecuted = DateTime.Now;
             _context.Jobs.Update(job);
             _context.SaveChanges();
 
+            // get all job parameters
             var jobParams = _context.JobParameters.Where(p => p.JobId == job.Id && p.IsLevelParameter == false).ToList();
 
             // to open chrome in headless mode
@@ -135,24 +141,28 @@ namespace OAuthLogin.BLL.Services
                     var results = driver.FindElements(By.XPath(param.XPath));
                     if (results.Count == 0)
                     {
-                        // return Task.FromResult(new List<JobResponse>());
+                         return Task.FromResult(new List<JobResponse>());
                     }
                     var count = 1;
                     foreach (var result in results)
                     {
+                        //check for existing job
                         var existingJobResponse = _context.JobResponses.FirstOrDefault(jr => jr.JobParameterId == param.Id && jr.ParamOrder == count);
 
+
                         if (existingJobResponse != null)
-                        {
+                        { 
+                            //update value 
                             existingJobResponse.Value = result.GetAttribute(param.Attribute) ?? "";
                         }
                         else
                         {
+                            //create new object
                             var jobResponse = new JobResponse()
                             {
                                 JobParameterId = param.Id,
                                 Value = result.GetAttribute(param.Attribute)  ?? "",
-                            ParamOrder = count,
+                                ParamOrder = count,
                             };
 
                             _context.JobResponses.Add(jobResponse);
@@ -167,7 +177,6 @@ namespace OAuthLogin.BLL.Services
             }
 
 
-
             var jobResponses = _context.JobResponses.Include(jr => jr.JobParameter).Where(j => j.JobParameter.JobId == job.Id).ToList();
             return Task.FromResult(jobResponses);
         }
@@ -175,7 +184,7 @@ namespace OAuthLogin.BLL.Services
 
         public void GetDetailsData(int JobId)
         {
-            Console.WriteLine("Start....GetDetailsData");
+            
             var jobParams = _context.JobParameters.Where(j => j.JobId == JobId && j.IsLevelParameter == true).ToList();
 
             var jobs = _context.JobResponses.Include(j => j.JobParameter).Where(j => j.JobParameter.JobId == JobId && j.JobParameter.ParameterName == "nextURL").ToList();

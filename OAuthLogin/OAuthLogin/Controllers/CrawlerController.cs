@@ -22,7 +22,7 @@ namespace OAuthLogin.Controllers
             _userManager = userManager;
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("GetData/{jobId}")]
         //public IActionResult GetData(int jobId)
         //{
@@ -35,6 +35,7 @@ namespace OAuthLogin.Controllers
         {
             //await _crawlerService.TriggerJob(jobId);
 
+            // Schedule the job to run daily
             RecurringJob.AddOrUpdate<ICrawlerService>($"Job{jobId}", x => x.TriggerJob(jobId), Cron.Daily(1));
             return Ok(new Response("Data loading scheduled successfully!", true));
         }

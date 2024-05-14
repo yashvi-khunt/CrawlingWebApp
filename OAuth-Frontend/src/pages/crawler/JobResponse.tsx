@@ -41,10 +41,20 @@ function JobResponse() {
                           <td>{data.parameterName}</td>
                           <td>&nbsp;:&nbsp;</td>
                           <td>
-                            {data.value.startsWith("http") ? (
+                            {data.attribute === "href" ? (
                               <a href={data.value} target="_blank">
                                 {data.value}
                               </a>
+                            ) : data.attribute.includes("src") ? (
+                              <img
+                                src={data.value}
+                                // width="50px"
+                                // height="50px"
+                                style={{
+                                  maxWidth: "150px",
+                                  maxHeight: "150px",
+                                }}
+                              />
                             ) : (
                               data.value || "-"
                             )}
