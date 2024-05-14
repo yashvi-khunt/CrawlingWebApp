@@ -40,6 +40,13 @@ export const crawlingJobApi = indexApi.injectEndpoints({
       }),
       invalidatesTags: ["CrawlingJob"],
     }),
+    deleteJob: builder.mutation<authTypes.apiResponse, number>({
+      query: (data) => ({
+        url: `Crawler/RemoveJob/${data}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["CrawlingJob"],
+    }),
   }),
 });
 
@@ -48,4 +55,5 @@ export const {
   useGetCrawlingJobsQuery,
   useGetCrawlingJobResponseQuery,
   useTriggerJobMutation,
+  useDeleteJobMutation,
 } = crawlingJobApi;

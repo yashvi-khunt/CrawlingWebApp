@@ -1,6 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Table from "../../components/dynamicTable/DynamicTable";
 import {
+  useDeleteJobMutation,
   useGetCrawlingJobsQuery,
   useTriggerJobMutation,
 } from "../../redux/api/crawlingJobApi";
@@ -9,7 +10,6 @@ import dayjs from "dayjs";
 import { useEffect } from "react";
 import { openSnackbar } from "../../redux/slice/snackbarSlice";
 import { useAppDispatch } from "../../redux/hooks";
-
 function CrawlingJobs() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -18,11 +18,14 @@ function CrawlingJobs() {
   });
   const dispatch = useAppDispatch();
   const [trigger, { data: triggerRes }] = useTriggerJobMutation();
+  const [deleteJob, { data: deleteRes }] = useDeleteJobMutation();
 
   const handleTrigger = (jobId: number, isTrigger: boolean) => {
     if (isTrigger) {
       console.log("trigger", jobId);
       trigger(jobId);
+    } else {
+      deleteJob(jobId);
     }
   };
 
@@ -36,6 +39,16 @@ function CrawlingJobs() {
       );
     }
   }, [triggerRes]);
+  useEffect(() => {
+    if (deleteRes?.success) {
+      dispatch(
+        openSnackbar({
+          severity: "success",
+          message: deleteRes?.message,
+        })
+      );
+    }
+  }, [deleteRes]);
 
   const columns: TableColumn<ApiTypes.CrawlingJobProps>[] = [
     {
@@ -87,6 +100,16 @@ function CrawlingJobs() {
       sortField: "lastExecuted",
     },
     {
+      name: "Next Execution",
+      selector: (row) =>
+        row.nextExecution
+          ? dayjs(row.nextExecution).format("DD/MM/YYYY hh:mm A")
+          : "-",
+      sortable: true,
+      sortField: "lastExecuted",
+    },
+
+    {
       name: "Action",
       selector: (row) => (
         <>
@@ -97,16 +120,18 @@ function CrawlingJobs() {
                 style={{ fontSize: "large" }}
               ></i>
             </a>
-            {row.recJob === 0 ? (
-              <button
-                className="btn"
-                onClick={() =>
-                  handleTrigger(row.jobId, row.recJob === 0 ? true : false)
-                }
-              >
-                <i className="fa-solid fa-circle-play text-success"></i>
-              </button>
-            ) : null}
+            <button
+              className="btn"
+              onClick={() =>
+                handleTrigger(row.jobId, row.recJob === 0 ? true : false)
+              }
+            >
+              {row.recJob === 0 ? (
+                <i className="fa-solid fa-circle-play text-success "></i>
+              ) : (
+                <i className="fa-solid fa-circle-pause text-danger"></i>
+              )}
+            </button>
           </div>
         </>
       ),

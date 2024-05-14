@@ -1,10 +1,8 @@
 USE [OAuthLoginDb]
 GO
-
-/****** Object:  StoredProcedure [dbo].[usp_Get_Crawling_Jobs]    Script Date: 09-05-2024 11:04:33 ******/
+/****** Object:  StoredProcedure [dbo].[usp_Get_Crawling_Jobs]    Script Date: 14-05-2024 11:38:42 ******/
 SET ANSI_NULLS ON
 GO
-
 SET QUOTED_IDENTIFIER ON
 GO
 
@@ -27,16 +25,25 @@ BEGIN
 
 	
 DROP TABLE IF EXISTS #tempCrawlingJobs
+DROP TABLE IF EXISTS #tempRecJobs
     -- Insert statements for procedure here
 	SELECT j.Id,max(jr.ParamOrder) as ResultCount INTO #tempCrawlingJobs
 	FROM Jobs j
+	--inner join AspNetUsers
+	--WHERE
 	left join JobParameters jp on jp.JobId = j.Id
 	left join JobResponses jr on jr.JobParameterId = jp.Id
-
 	GROUP BY J.Id
 
-	
 
+	SELECT CONVERT(INT, Right(hs.Value, LEN(hs.Value)-3)) as JobId
+	,SWITCHOFFSET(DATEADD(second,cast(substring(net ,1,10) as int), '19700101'),'+05:30')
+		as NextExecution INTO #tempRecJobs from HangFire.[Set] hs 
+		   inner join (select Right([Key], LEN([Key])-14) as jobId,
+		   Value as net from HangFire.[Hash] 
+	where Field='NextExecution') ne on ne.jobId = hs.Value
+
+	
 	 -- It returns number of users after applying filters.
    SELECT Count(*) AS count FROM #tempCrawlingJobs
 
@@ -57,17 +64,16 @@ DROP TABLE IF EXISTS #tempCrawlingJobs
      CASE WHEN @Field = 'lastExecuted' AND @Sort = 'desc' THEN j.LastExecuted END DESC
      )
      AS Id ,
-	 j.Id AS JobId,j.Name,j.URL,ResultCount,a.Email as CreatedBy,j.CreatedDate,j.LastExecuted
+	 j.Id AS JobId,j.Name,j.URL,ResultCount,a.Email as CreatedBy,j.CreatedDate,j.LastExecuted, trj.JobId as RecJob, convert(datetime,trj.NextExecution) as NextExecution
 	 FROM Jobs j
 	 INNER JOIN AspnetUsers a ON a.Id = j.CreatedById
 	 Left JOIN #tempCrawlingJobs tcj ON tcj.Id = j.Id	
-
+	 Left Join #tempRecJobs trj ON j.Id = trj.JobId
 	 order by Id
     OFFSET (@Page-1) * @pageSize ROWS FETCH NEXT @pagesize ROWS ONLY
 
 
 END
-GO
-exec usp_Get_Crawling_Jobs
 
-select * from AspNetUsers
+
+--exec usp_Get_Crawling_Jobs

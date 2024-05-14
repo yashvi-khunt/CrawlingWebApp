@@ -70,6 +70,7 @@ declare namespace ApiTypes {
     createdDate: string;
     lastExecuted: string;
     recJob: number | null;
+    nextExecution: string;
   };
 
   type GetCrawlingJobProps = Omit<Global.apiResponse, "data"> & {
