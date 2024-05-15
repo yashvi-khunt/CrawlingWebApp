@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE PROCEDURE [dbo].[usp_Get_Login_History]
+ALTER PROCEDURE [dbo].[usp_Get_Login_History]
      @Field NVARCHAR(50) = 'date', --code
     @Sort NVARCHAR(50) = 'desc', -- asc
     @Page BIGINT = 1,

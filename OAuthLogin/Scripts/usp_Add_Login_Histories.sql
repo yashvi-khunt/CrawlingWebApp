@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE PROCEDURE [dbo].[usp_Add_Login_Histories]
+ALTER PROCEDURE [dbo].[usp_Add_Login_Histories]
 	-- Add the parameters for the stored procedure here
 	@UserId nvarchar(450),
 	@DateTime datetime2(7),

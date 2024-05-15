@@ -6,24 +6,23 @@ using OAuthLogin.DAL.Models;
 using OAuthLogin.DAL.ViewModels;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
 
 namespace OAuthLogin.BLL.Services
 {
     public class CrawlerService : ICrawlerService
     {
-
         private readonly OAuthDbContext _context;
         private readonly IProcedureManager _procedureManager;
+
         public CrawlerService(OAuthDbContext dbContext, IProcedureManager procedureManager)
         {
             _context = dbContext;
             _procedureManager = procedureManager;
-            
         }
 
-        public Task<Job> AddCrawlingJob(VMAddCrawlingJob vMAddCrawlingJob, string userId)
+        public async Task<Job> AddCrawlingJob(VMAddCrawlingJob vMAddCrawlingJob, string userId)
         {
-            // Add job to Job Table
             var newJob = new Job
             {
                 Name = vMAddCrawlingJob.JobName,
@@ -31,211 +30,195 @@ namespace OAuthLogin.BLL.Services
                 CreatedById = userId,
                 CreatedDate = DateTime.Now,
             };
-            _context.Jobs.Add(newJob);
 
-            _context.SaveChanges();
+            await _context.Jobs.AddAsync(newJob);
+            await _context.SaveChangesAsync();
 
-
-            //Add job Parameters to JobParameter Table
-            foreach (var item in vMAddCrawlingJob.Parameters)
+            var jobParameters = vMAddCrawlingJob.Parameters.Select(item => new JobParameter
             {
-                var param = new JobParameter
-                {
-                    ParameterName = item.Param,
-                    XPath = item.Xpath,
-                    Attribute = item.Attribute,
-                    IsLevelParameter = item.IsLevelParam,
-                    JobId = newJob.Id,
-                };
-                _context.JobParameters.Add(param);
-            }
+                ParameterName = item.Param,
+                XPath = item.Xpath,
+                Attribute = item.Attribute,
+                IsLevelParameter = item.IsLevelParam,
+                JobId = newJob.Id,
+            }).ToList();
 
-            _context.SaveChanges();
-            return Task.FromResult(newJob);
+            await _context.JobParameters.AddRangeAsync(jobParameters);
+            await _context.SaveChangesAsync();
+
+            return newJob;
         }
 
-        public Task<VMGetCrawlingJobs> GetAllCrawlingJobs(VMGetCrawlingJobsInput vMGetCrawlingJobsInput)
+        public async Task<VMGetCrawlingJobs> GetAllCrawlingJobs(VMGetCrawlingJobsInput vMGetCrawlingJobsInput)
         {
-            
             var crawlingJobs = _procedureManager.ExecStoreProcedureMulResults<StoredProcedureCommonModel, VMSpGetCrawlingJobs>(StoredProcedure.GetCrawlingJobs, vMGetCrawlingJobsInput);
 
-            var countData = crawlingJobs.Item1[0].Count;
-            var crawlingJobsData = crawlingJobs.Item2;
-
-
-            VMGetCrawlingJobs getCrawlingJobs = new VMGetCrawlingJobs
+            return new VMGetCrawlingJobs
             {
-                Count = (int)countData,
-                CrawlingJobs = crawlingJobsData
+                Count = (int)crawlingJobs.Item1[0].Count ,
+                CrawlingJobs = crawlingJobs.Item2
             };
-
-            return Task.FromResult(getCrawlingJobs);
         }
 
-        public Task<List<VMJobResponseForJobId>> GetResponseForJobId(int JobId)
-
+        public async Task<List<VMJobResponseForJobId>> GetResponseForJobId(int JobId)
         {
-            //sp call
-            VMJobResponseInputModel spParam = new VMJobResponseInputModel { JobId = JobId };
-            var response = _procedureManager.ExecStoreProcedureMulResults<StoredProcedureCommonModel, VMSPJobResponse>(StoredProcedure.GetResponseForJobId,spParam);
+            var spParam = new VMJobResponseInputModel { JobId = JobId };
+            var response = _procedureManager.ExecStoreProcedureMulResults<StoredProcedureCommonModel, VMSPJobResponse>(StoredProcedure.GetResponseForJobId, spParam);
 
-            // sp response
-            var totalJobs = response.Item1[0].Count;
-            var responseData = response.Item2;
-            List<VMJobResponseForJobId> jobResponse = new List<VMJobResponseForJobId>();
+            var jobResponse = response.Item2.GroupBy(r => r.ParamOrder)
+                                             .Select(g => new VMJobResponseForJobId
+                                             {
+                                                 ParamOrder = g.Key,
+                                                 Data = g.Select(job => new VMJobResponseData
+                                                 {
+                                                     ParameterName = job.ParameterName,
+                                                     Value = job.Value,
+                                                     Attribute = job.Attribute
+                                                 }).ToList()
+                                             }).ToList();
 
-            for (var count = 1; count <= totalJobs; count++)
-            {
-                var jobs = responseData.FindAll(r => r.ParamOrder == count);
-                List<VMJobResponseData> responseList = new List<VMJobResponseData>();
-                foreach (var job in jobs)
-                {
-                    responseList.Add(
-                    new VMJobResponseData
-                    {
-                        ParameterName = job.ParameterName,
-                        Value = job.Value,
-                        Attribute = job.Attribute,
-                    });
-                }
-                jobResponse.Add(new VMJobResponseForJobId { ParamOrder = count,Data=responseList});
-            }
-            return Task.FromResult(jobResponse);
-
+            return jobResponse;
         }
-
 
         public async Task TriggerJob(int jobId)
         {
             await GetData(jobId);
-             GetDetailsData(jobId);
-            return;
+            await GetDetailsData(jobId);
         }
 
-        public Task GetData(int JobId)
+        private ChromeDriver CreateChromeDriver()
         {
-            //find job
-            var job = _context.Jobs.Where(j => j.Id == JobId).FirstOrDefault();
+            var chromeOptions = new ChromeOptions();
+            chromeOptions.AddArguments("headless");
+            return new ChromeDriver(chromeOptions);
+        }
 
-            //update last executed time
+        private async Task NavigateToUrlAsync(ChromeDriver driver, string url, bool shouldWait)
+        {
+            driver.Navigate().GoToUrl(url);
+            if (shouldWait)
+            {
+                try
+                {
+                    var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                    wait.Until(x => x.FindElements(By.ClassName("product-tiles")));
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    Console.WriteLine("Page timed out after 10 secs.");
+                }
+            }
+        }
+
+        private async Task ProcessJobParametersAsync(ChromeDriver driver, List<JobParameter> jobParams)
+        {
+            foreach (var param in jobParams)
+            {
+                var results = driver.FindElements(By.XPath(param.XPath));
+                if (results.Count == 0) return;
+
+                int count = 1;
+                foreach (var result in results)
+                {
+                    var existingJobResponse = await _context.JobResponses
+                        .FirstOrDefaultAsync(jr => jr.JobParameterId == param.Id && jr.ParamOrder == count);
+
+                    if (existingJobResponse != null)
+                    {
+                        existingJobResponse.Value = result.GetAttribute(param.Attribute) ?? "";
+                    }
+                    else
+                    {
+                        var jobResponse = new JobResponse
+                        {
+                            JobParameterId = param.Id,
+                            Value = result.GetAttribute(param.Attribute) ?? "",
+                            ParamOrder = count
+                        };
+                        await _context.JobResponses.AddAsync(jobResponse);
+                    }
+                    count++;
+                }
+            }
+        }
+
+        private async Task ProcessDetailParametersAsync(ChromeDriver driver, List<JobParameter> jobParams, int paramOrder)
+        {
+            foreach (var param in jobParams)
+            {
+                string result = string.Empty;
+                try
+                {
+                    result = driver.FindElement(By.XPath(param.XPath)).GetAttribute(param.Attribute) ?? "";
+                }
+                catch (NoSuchElementException)
+                {
+                    // log error if needed
+                }
+
+                var existingJobResponse = await _context.JobResponses
+                    .FirstOrDefaultAsync(jr => jr.JobParameterId == param.Id && jr.ParamOrder == paramOrder);
+
+                if (existingJobResponse != null)
+                {
+                    existingJobResponse.Value = result ?? "";
+                }
+                else
+                {
+                    var jobResponse = new JobResponse
+                    {
+                        JobParameterId = param.Id,
+                        Value = result ?? "",
+                        ParamOrder = paramOrder
+                    };
+                    await _context.JobResponses.AddAsync(jobResponse);
+                }
+            }
+        }
+
+        public async Task GetData(int jobId)
+        {
+            var job = await _context.Jobs.FindAsync(jobId);
+            if (job == null) return;
+
             job.LastExecuted = DateTime.Now;
             _context.Jobs.Update(job);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
-            // get all job parameters
-            var jobParams = _context.JobParameters.Where(p => p.JobId == job.Id && p.IsLevelParameter == false).ToList();
+            var jobParams = await _context.JobParameters
+                .Where(p => p.JobId == job.Id && !p.IsLevelParameter)
+                .ToListAsync();
 
-            // to open chrome in headless mode
-            var chromeOptions = new ChromeOptions();
-            chromeOptions.AddArguments("headless");
-
-            using (var driver = new ChromeDriver(chromeOptions))
+            using (var driver = CreateChromeDriver())
             {
-                //navigating to the target page in browser
-                driver.Navigate().GoToUrl(job.URL);
-
-
-                //iterating over each parameter in the job form
-                foreach (var param in jobParams)
-                {
-                    var results = driver.FindElements(By.XPath(param.XPath));
-                    if (results.Count == 0)
-                    {
-                         return Task.FromResult(new List<JobResponse>());
-                    }
-                    var count = 1;
-                    foreach (var result in results)
-                    {
-                        //check for existing job
-                        var existingJobResponse = _context.JobResponses.FirstOrDefault(jr => jr.JobParameterId == param.Id && jr.ParamOrder == count);
-
-
-                        if (existingJobResponse != null)
-                        { 
-                            //update value 
-                            existingJobResponse.Value = result.GetAttribute(param.Attribute) ?? "";
-                        }
-                        else
-                        {
-                            //create new object
-                            var jobResponse = new JobResponse()
-                            {
-                                JobParameterId = param.Id,
-                                Value = result.GetAttribute(param.Attribute)  ?? "",
-                                ParamOrder = count,
-                            };
-
-                            _context.JobResponses.Add(jobResponse);
-                        }
-
-                        count++;
-                    }
-
-                }
-                _context.SaveChanges();
-
+                await NavigateToUrlAsync(driver, job.URL, jobId == 14);
+                await ProcessJobParametersAsync(driver, jobParams);
             }
 
-
-            var jobResponses = _context.JobResponses.Include(jr => jr.JobParameter).Where(j => j.JobParameter.JobId == job.Id).ToList();
-            return Task.FromResult(jobResponses);
+            await _context.SaveChangesAsync();
         }
 
-
-        public void GetDetailsData(int JobId)
+        public async Task GetDetailsData(int jobId)
         {
-            
-            var jobParams = _context.JobParameters.Where(j => j.JobId == JobId && j.IsLevelParameter == true).ToList();
+            var jobParams = await _context.JobParameters
+                .Where(j => j.JobId == jobId && j.IsLevelParameter)
+                .ToListAsync();
 
-            var jobs = _context.JobResponses.Include(j => j.JobParameter).Where(j => j.JobParameter.JobId == JobId && j.JobParameter.ParameterName == "nextURL").ToList();
-            // to open chrome in headless mode
-            var chromeOptions = new ChromeOptions();
-            chromeOptions.AddArguments("headless");
+            var jobs = await _context.JobResponses
+                .Include(j => j.JobParameter)
+                .Where(j => j.JobParameter.JobId == jobId && j.JobParameter.ParameterName == "nextURL")
+                .ToListAsync();
 
-            using (var driver = new ChromeDriver(chromeOptions))
+            using (var driver = CreateChromeDriver())
             {
-                //navigating to the target page in browser
-
                 foreach (var job in jobs)
                 {
                     driver.Navigate().GoToUrl(job.Value);
-                    foreach (var param in jobParams)
-                    {
-
-                        var result = string.Empty;
-                        try
-                        {
-                            result = driver.FindElement(By.XPath(param.XPath)).GetAttribute(param.Attribute) ?? "";
-                        }
-                        catch (NoSuchElementException ex)
-                        {
-                            ////log
-
-                        }
-
-                        var existingJobResponse = _context.JobResponses.FirstOrDefault(jr => jr.JobParameterId == param.Id && jr.ParamOrder == job.ParamOrder);
-                        if (existingJobResponse != null)
-                        {
-                            existingJobResponse.Value = result ?? "";
-                        }
-                        else
-                        {
-                            var jobResponse = new JobResponse()
-                            {
-                                JobParameterId = param.Id,
-                                Value = result ?? "",
-                                ParamOrder = job.ParamOrder,
-                            };
-
-                            _context.JobResponses.Add(jobResponse);
-                        }
-                    }
+                    await ProcessDetailParametersAsync(driver, jobParams, job.ParamOrder);
                 }
-
-                _context.SaveChanges();
-
             }
-        }
 
+            await _context.SaveChangesAsync();
+        }
     }
 }

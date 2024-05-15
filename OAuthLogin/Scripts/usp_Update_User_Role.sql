@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 
-CREATE PROCEDURE [dbo].[usp_Update_User_Role]
+ALTER PROCEDURE [dbo].[usp_Update_User_Role]
 	-- Add the parameters for the stored procedure here
 	@UserId NVARCHAR(450) = '',
 	@RoleId NVARCHAR(450) =''

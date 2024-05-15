@@ -13,7 +13,7 @@ GO
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-Alter PROCEDURE [dbo].[usp_Get_Respone_For_JobId]
+ALTER PROCEDURE [dbo].[usp_Get_Respone_For_JobId]
 -- Add the parameters for the stored procedure here
 	@JobId int  
 AS

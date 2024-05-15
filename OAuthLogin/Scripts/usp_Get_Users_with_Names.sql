@@ -8,7 +8,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE [dbo].[usp_Get_Users_With_Names]
+ALTER PROCEDURE [dbo].[usp_Get_Users_With_Names]
 AS
 BEGIN
     SET NOCOUNT ON;

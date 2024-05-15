@@ -35,7 +35,7 @@ export const crawlingJobApi = indexApi.injectEndpoints({
     }),
     triggerJob: builder.mutation<authTypes.apiResponse, number>({
       query: (data) => ({
-        url: `Crawler/GetData/${data}`,
+        url: `Crawler/CreateJob/${data}`,
         method: "POST",
       }),
       invalidatesTags: ["CrawlingJob"],

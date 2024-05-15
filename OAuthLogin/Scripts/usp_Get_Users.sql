@@ -8,7 +8,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE [dbo].[usp_Get_Users]
+ALTER PROCEDURE [dbo].[usp_Get_Users]
     @Field NVARCHAR(50) = 'createdDate', --code
     @Sort NVARCHAR(50) = 'desc', -- asc
     @Page BIGINT = 1,
