@@ -120,7 +120,13 @@ function CrawlingJobs() {
                 style={{ fontSize: "large" }}
               ></i>
             </a>
-            <button
+            <a className="btn" href={`/crawling-jobs/responses/${row.jobId}`}>
+              <i
+                className="fa fa-regular fa-file-lines text-success"
+                style={{ fontSize: "large" }}
+              ></i>
+            </a>
+            {/* <button
               className="btn"
               onClick={() => handleTrigger(row.jobId, true)}
             >
@@ -129,7 +135,7 @@ function CrawlingJobs() {
               ) : (
                 <i className="fa-solid fa-circle-pause text-danger"></i>
               )}
-            </button>
+            </button> */}
             <a className="btn" href={`/crawling-jobs/edit/${row.jobId}`}>
               <i
                 className="fa fa-pen text-info"

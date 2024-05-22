@@ -1,3 +1,4 @@
+import { data } from "jquery";
 import { indexApi } from "./indexApi";
 
 export const crawlingJobApi = indexApi.injectEndpoints({
@@ -53,6 +54,16 @@ export const crawlingJobApi = indexApi.injectEndpoints({
       }),
       providesTags: ["CrawlingJob"],
     }),
+    editJob: builder.mutation<
+      authTypes.apiResponse,
+      ApiTypes.EditCrawlingJobParams
+    >({
+      query: (data) => ({
+        url: `Crawler/EditJob/${data.id}`,
+        method: "PUT",
+        body: data.obj,
+      }),
+    }),
   }),
 });
 
@@ -63,4 +74,5 @@ export const {
   useTriggerJobMutation,
   useDeleteJobMutation,
   useGetFormDataQuery,
+  useEditJobMutation,
 } = crawlingJobApi;

@@ -26,11 +26,8 @@ namespace OAuthLogin.Controllers
         [Route("CreateJob/{jobId}")]
         public IActionResult CreateJob(int jobId)
         {
-            //await _crawlerService.TriggerJob(jobId);
-
-            // Schedule the job to run daily
-            RecurringJob.AddOrUpdate<ICrawlerService>($"Job{jobId}", x => x.TriggerJob(jobId), Cron.Daily(1));
-            RecurringJob.Trigger($"Job{jobId}");
+            RecurringJob.AddOrUpdate<ICrawlerService>($"Job{jobId}", x => x.TriggerJob(jobId), GenerateCronExpression() );
+            RecurringJob.TriggerJob($"Job{jobId}");
             return Ok(new Response("Data loading scheduled successfully!", true));
         }
 
@@ -136,7 +133,7 @@ namespace OAuthLogin.Controllers
                 if (response != null)
                 {
                     // Optionally re-schedule the job if needed
-                    RecurringJob.AddOrUpdate<ICrawlerService>($"Job{jobId}", x => x.TriggerJob(jobId), Cron.Daily(1));
+                    RecurringJob.AddOrUpdate<ICrawlerService>($"Job{jobId}", x => x.TriggerJob(jobId), GenerateCronExpression());
                     RecurringJob.Trigger($"Job{jobId}");
                     return Ok(new Response("Job edited and rescheduled successfully!", true));
                 }
@@ -149,6 +146,19 @@ namespace OAuthLogin.Controllers
             {
                 return StatusCode(500, new Response(ex.Message, false));
             }
+        }
+
+        private string GenerateCronExpression()
+        {
+            DateTime now = DateTime.UtcNow;
+
+            // Extract the hour and minute
+            int hour = now.Hour ;
+            int minute = now.Minute ;
+
+            // Construct the cron expression for daily at the current time
+            string cronExpression = $"{minute} {hour} * * *";
+            return cronExpression;
         }
     }
 }

@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../redux/hooks";
-import { useGetFormDataQuery } from "../../redux/api/crawlingJobApi";
+import {
+  useEditJobMutation,
+  useGetFormDataQuery,
+} from "../../redux/api/crawlingJobApi";
 import { useForm } from "react-hook-form";
 import ParameterCard from "./ParameterCard";
+import { openSnackbar } from "../../redux/slice/snackbarSlice";
 
 function EditJob() {
   const { jobId } = useParams();
@@ -14,12 +18,16 @@ function EditJob() {
     error: jobError,
     isLoading: jobLoading,
   } = useGetFormDataQuery(parseInt(jobId || ""));
+  const [updateJob, { data: updateRes, error: updateErr }] =
+    useEditJobMutation();
+
   const {
     handleSubmit,
     register,
     setValue,
     formState: { errors },
   } = useForm();
+
   const [showLevelParams, setShowLevelParams] = useState(false);
   const [showBaseParams, setShowBaseParams] = useState(false);
   const [baseParams, setBaseParams] = useState([]);
@@ -46,6 +54,11 @@ function EditJob() {
         (param) => param.param === "ParentEl"
       );
 
+      const filteredBaseParams = baseParams.filter(
+        (param) => param.param !== "nextURL" && param.param !== "ParentEl"
+      );
+      setBaseParams(filteredBaseParams);
+
       if (nextUrlParam) {
         setNextUrl(nextUrlParam.xpath);
         setShowLevelParams(true);
@@ -62,7 +75,7 @@ function EditJob() {
       (param) => param.param !== "nextURL" && param.param !== "ParentEl"
     );
 
-    const obj = {
+    const obj: ApiTypes.AddCrawlingJobParams = {
       jobName: data.jobName,
       url: data.url,
       parameters: [
@@ -98,18 +111,43 @@ function EditJob() {
     }
 
     console.log({ id: jobId, ...obj });
-    // updateJob({ id: jobId, ...obj });
+    updateJob({ id: parseInt(jobId || ""), obj: obj });
   };
+
+  useEffect(() => {
+    if (updateRes?.success) {
+      dispatch(
+        openSnackbar({
+          severity: "success",
+          message: updateRes.message,
+        })
+      );
+      navigate("/crawling-jobs");
+    }
+  }, [updateRes]);
+
+  useEffect(() => {
+    // console.log(error?.data.message);
+    if (updateErr?.data && !updateErr?.data.success)
+      dispatch(
+        openSnackbar({
+          severity: "error",
+          message: updateErr?.data.message,
+        })
+      );
+  }, [updateErr?.data]);
 
   const handleInputChange = (index, key, value, isLevel) => {
     if (!isLevel) {
-      const params = [...baseParams];
-      params[index][key] = value;
-      setBaseParams(params);
+      const updatedParams = baseParams.map((param, i) =>
+        i === index ? { ...param, [key]: value } : param
+      );
+      setBaseParams(updatedParams);
     } else {
-      const params = [...levelParams];
-      params[index][key] = value;
-      setLevelParams(params);
+      const updatedParams = levelParams.map((param, i) =>
+        i === index ? { ...param, [key]: value } : param
+      );
+      setLevelParams(updatedParams);
     }
   };
 
@@ -148,9 +186,17 @@ function EditJob() {
       <div className="content-wrapper">
         <section className="content-header">
           <div className="container-fluid">
-            <div className="row mb-2">
-              <div className="col-sm-6">
+            <div className="row mb-2 justify-between">
+              <div>
                 <h1>Edit Crawling Job</h1>
+              </div>
+              <div>
+                <button
+                  onClick={() => navigate("/crawling-jobs")}
+                  className="btn btn-primary float-sm-right"
+                >
+                  Back
+                </button>
               </div>
             </div>
           </div>

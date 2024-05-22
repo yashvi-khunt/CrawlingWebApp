@@ -60,6 +60,11 @@ declare namespace ApiTypes {
     ];
   };
 
+  type EditCrawlingJobParams = {
+    id: number;
+    obj: AddCrawlingJobParams;
+  };
+
   type GetFormData = Omit<Global.apiResponse, "data"> & {
     data: AddCrawlingJobParams;
   };

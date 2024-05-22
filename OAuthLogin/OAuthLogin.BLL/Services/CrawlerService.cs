@@ -33,8 +33,7 @@ namespace OAuthLogin.BLL.Services
             };
 
             await _context.Jobs.AddAsync(newJob);
-            await _context.SaveChangesAsync();
-
+            _context.SaveChanges();
             var jobParameters = vMAddCrawlingJob.Parameters.Select(item => new JobParameter
             {
                 ParameterName = item.Param,
@@ -45,7 +44,14 @@ namespace OAuthLogin.BLL.Services
             }).ToList();
 
             await _context.JobParameters.AddRangeAsync(jobParameters);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
 
             return newJob;
         }
@@ -96,9 +102,9 @@ namespace OAuthLogin.BLL.Services
 
         private Task NavigateToUrlAsync(ChromeDriver driver, string url,/* bool shouldWait*/ string xpath)
         {
-            
-                driver.Navigate().GoToUrl(url);
-            //driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
+
+            driver.Navigate().GoToUrl(url);
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
             //if (shouldWait)
             //{
             try
@@ -118,12 +124,12 @@ namespace OAuthLogin.BLL.Services
         private async Task ProcessJobParametersAsync(ChromeDriver driver, List<JobParameter> jobParams, string pxpath)
         {
             var results = driver.FindElements(By.XPath(pxpath));
-             
+
             if (results.Count == 0) return;
             int count = 1;
             foreach (var result in results)
             {
-              
+
                 foreach (var param in jobParams)
                 {
                     if (param.ParameterName == "ParentEl") continue;
@@ -294,7 +300,7 @@ namespace OAuthLogin.BLL.Services
                 if (existingParam != null)
                 {
                     // Update existing parameter
-                    existingParam.Attribute = paramModel.Attribute;
+                    existingParam.Attribute = paramModel.Attribute ?? "textContent";
                     existingParam.IsLevelParameter = paramModel.IsLevelParam;
                 }
                 else

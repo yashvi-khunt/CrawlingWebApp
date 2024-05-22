@@ -18,6 +18,7 @@ import {
   JobResponse,
 } from "../pages";
 import EditJob from "../pages/crawler/EditJob";
+import JobFormData from "../pages/crawler/JobFormData";
 
 export const routerHelper: Global.RouteConfig = [
   {
@@ -98,8 +99,13 @@ export const routerHelper: Global.RouteConfig = [
         roles: ["Admin", "User"],
       },
       {
-        path: "details/:jobId",
+        path: "responses/:jobId",
         element: <JobResponse />,
+        roles: ["Admin", "User"],
+      },
+      {
+        path: "details/:jobId",
+        element: <JobFormData />,
         roles: ["Admin", "User"],
       },
       {

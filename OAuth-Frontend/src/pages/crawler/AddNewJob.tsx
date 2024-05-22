@@ -71,7 +71,7 @@ function AddNewJob() {
       obj.parameters = [
         ...obj.parameters,
         {
-          param: "parentEl",
+          param: "ParentEl",
           xpath: parentEl,
           isLevelParam: false,
         },
@@ -86,7 +86,7 @@ function AddNewJob() {
     }
 
     console.log(obj);
-    //addJob(obj);
+    addJob(obj);
   };
 
   const handleInputChange = (index, key, value, isLevel) => {
@@ -136,9 +136,17 @@ function AddNewJob() {
       <div className="content-wrapper">
         <section className="content-header">
           <div className="container-fluid">
-            <div className="row mb-2">
-              <div className="col-sm-6">
+            <div className="row mb-2 justify-between">
+              <div>
                 <h1>Add Crawling Job</h1>
+              </div>
+              <div>
+                <button
+                  onClick={() => navigate("/crawling-jobs")}
+                  className="btn btn-primary float-sm-right"
+                >
+                  Back
+                </button>
               </div>
             </div>
           </div>
