@@ -35,7 +35,7 @@ export const crawlingJobApi = indexApi.injectEndpoints({
     }),
     triggerJob: builder.mutation<authTypes.apiResponse, number>({
       query: (data) => ({
-        url: `Crawler/CreateJob/${data}`,
+        url: `Crawler/TriggerJob/${data}`,
         method: "POST",
       }),
       invalidatesTags: ["CrawlingJob"],
@@ -47,6 +47,12 @@ export const crawlingJobApi = indexApi.injectEndpoints({
       }),
       invalidatesTags: ["CrawlingJob"],
     }),
+    getFormData: builder.query<ApiTypes.GetFormData, number>({
+      query: (data) => ({
+        url: `Crawler/GetFormByJobId/${data}`,
+      }),
+      providesTags: ["CrawlingJob"],
+    }),
   }),
 });
 
@@ -56,4 +62,5 @@ export const {
   useGetCrawlingJobResponseQuery,
   useTriggerJobMutation,
   useDeleteJobMutation,
+  useGetFormDataQuery,
 } = crawlingJobApi;

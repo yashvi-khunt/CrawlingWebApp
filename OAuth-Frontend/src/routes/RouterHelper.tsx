@@ -17,6 +17,7 @@ import {
   AddNewJob,
   JobResponse,
 } from "../pages";
+import EditJob from "../pages/crawler/EditJob";
 
 export const routerHelper: Global.RouteConfig = [
   {
@@ -99,6 +100,11 @@ export const routerHelper: Global.RouteConfig = [
       {
         path: "details/:jobId",
         element: <JobResponse />,
+        roles: ["Admin", "User"],
+      },
+      {
+        path: "edit/:jobId",
+        element: <EditJob />,
         roles: ["Admin", "User"],
       },
     ],

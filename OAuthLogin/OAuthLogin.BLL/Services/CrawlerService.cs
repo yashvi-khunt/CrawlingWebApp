@@ -7,6 +7,7 @@ using OAuthLogin.DAL.ViewModels;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using System.Runtime.InteropServices;
 
 namespace OAuthLogin.BLL.Services
 {
@@ -55,7 +56,7 @@ namespace OAuthLogin.BLL.Services
 
             return new VMGetCrawlingJobs
             {
-                Count = (int)crawlingJobs.Item1[0].Count ,
+                Count = (int)crawlingJobs.Item1[0].Count,
                 CrawlingJobs = crawlingJobs.Item2
             };
         }
@@ -93,52 +94,61 @@ namespace OAuthLogin.BLL.Services
             return new ChromeDriver(chromeOptions);
         }
 
-        private async Task NavigateToUrlAsync(ChromeDriver driver, string url, bool shouldWait)
+        private Task NavigateToUrlAsync(ChromeDriver driver, string url,/* bool shouldWait*/ string xpath)
         {
-            driver.Navigate().GoToUrl(url);
-            if (shouldWait)
+            
+                driver.Navigate().GoToUrl(url);
+            //driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
+            //if (shouldWait)
+            //{
+            try
             {
-                try
-                {
-                    var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-                    wait.Until(x => x.FindElements(By.ClassName("product-tiles")));
-                }
-                catch (WebDriverTimeoutException)
-                {
-                    Console.WriteLine("Page timed out after 10 secs.");
-                }
+                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                var res = wait.Until(x => x.FindElements(By.XPath(xpath)));
+                return Task.FromResult(res.Count);
             }
+            catch (Exception)
+            {
+                Console.WriteLine("Page timed out after 10 secs.");
+                return null;
+            }
+            //}
         }
 
-        private async Task ProcessJobParametersAsync(ChromeDriver driver, List<JobParameter> jobParams)
+        private async Task ProcessJobParametersAsync(ChromeDriver driver, List<JobParameter> jobParams, string pxpath)
         {
-            foreach (var param in jobParams)
+            var results = driver.FindElements(By.XPath(pxpath));
+             
+            if (results.Count == 0) return;
+            int count = 1;
+            foreach (var result in results)
             {
-                var results = driver.FindElements(By.XPath(param.XPath));
-                if (results.Count == 0) return;
-
-                int count = 1;
-                foreach (var result in results)
+              
+                foreach (var param in jobParams)
                 {
+                    if (param.ParameterName == "ParentEl") continue;
+
+                    var res = result.FindElement(By.XPath($".{param.XPath}"));
+                    Console.WriteLine(res.Text);
                     var existingJobResponse = await _context.JobResponses
                         .FirstOrDefaultAsync(jr => jr.JobParameterId == param.Id && jr.ParamOrder == count);
 
                     if (existingJobResponse != null)
                     {
-                        existingJobResponse.Value = result.GetAttribute(param.Attribute) ?? "";
+                        existingJobResponse.Value = res.GetAttribute(param.Attribute) ?? "";
                     }
                     else
                     {
                         var jobResponse = new JobResponse
                         {
                             JobParameterId = param.Id,
-                            Value = result.GetAttribute(param.Attribute) ?? "",
+                            Value = res.GetAttribute(param.Attribute) ?? "",
                             ParamOrder = count
                         };
                         await _context.JobResponses.AddAsync(jobResponse);
                     }
-                    count++;
                 }
+                count++;
             }
         }
 
@@ -191,8 +201,9 @@ namespace OAuthLogin.BLL.Services
 
             using (var driver = CreateChromeDriver())
             {
-                await NavigateToUrlAsync(driver, job.URL, jobId == 14);
-                await ProcessJobParametersAsync(driver, jobParams);
+                var parentxpath = jobParams.Find(x => x.ParameterName == "ParentEl").XPath;
+                await NavigateToUrlAsync(driver, job.URL, parentxpath);
+                await ProcessJobParametersAsync(driver, jobParams, parentxpath);
             }
 
             await _context.SaveChangesAsync();
@@ -219,6 +230,92 @@ namespace OAuthLogin.BLL.Services
             }
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<VMAddCrawlingJob> GetFormByJobId(int jobId)
+        {
+            var job = _context.Jobs.Include(j => j.Parameters).FirstOrDefault(j => j.Id == jobId);
+
+
+            if (job == null)
+            {
+                throw new NotFoundException(); // or throw an exception, or handle as per your logic
+            }
+
+            var vmAddCrawlingJob = new VMAddCrawlingJob
+            {
+                JobName = job.Name,
+                URL = job.URL,
+                Parameters = job.Parameters.Select(param => new ParameterModel
+                {
+                    Param = param.ParameterName,
+                    Xpath = param.XPath,
+                    Attribute = param.Attribute,
+                    IsLevelParam = param.IsLevelParameter,
+                }).ToList(),
+            };
+            return vmAddCrawlingJob;
+        }
+
+
+        public async Task<Job> EditCrawlingJob(int jobId, VMAddCrawlingJob vMAddCrawlingJob, string userId)
+        {
+            // Retrieve the existing job with parameters
+            var existingJob = await _context.Jobs.Include(j => j.Parameters).FirstOrDefaultAsync(j => j.Id == jobId);
+
+            if (existingJob == null)
+            {
+                throw new NotFoundException("Job not found");
+            }
+
+            // Update job details
+            existingJob.Name = vMAddCrawlingJob.JobName;
+            existingJob.URL = vMAddCrawlingJob.URL;
+            existingJob.UpdatedById = userId;
+            existingJob.UpdatedDate = DateTime.Now;
+
+            // Update parameters
+            var existingParameters = existingJob.Parameters.ToList();
+
+            // Remove parameters that are not in the new list
+            foreach (var existingParam in existingParameters)
+            {
+                if (!vMAddCrawlingJob.Parameters.Any(p => p.Param == existingParam.ParameterName && p.Xpath == existingParam.XPath))
+                {
+                    _context.JobParameters.Remove(existingParam);
+                }
+            }
+
+            // Update and add parameters
+            foreach (var paramModel in vMAddCrawlingJob.Parameters)
+            {
+                var existingParam = existingParameters.FirstOrDefault(p => p.ParameterName == paramModel.Param && p.XPath == paramModel.Xpath);
+
+                if (existingParam != null)
+                {
+                    // Update existing parameter
+                    existingParam.Attribute = paramModel.Attribute;
+                    existingParam.IsLevelParameter = paramModel.IsLevelParam;
+                }
+                else
+                {
+                    // Add new parameter
+                    var newParam = new JobParameter
+                    {
+                        ParameterName = paramModel.Param,
+                        XPath = paramModel.Xpath,
+                        Attribute = paramModel.Attribute,
+                        IsLevelParameter = paramModel.IsLevelParam,
+                        JobId = existingJob.Id
+                    };
+                    await _context.JobParameters.AddAsync(newParam);
+                }
+            }
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+
+            return existingJob;
         }
     }
 }

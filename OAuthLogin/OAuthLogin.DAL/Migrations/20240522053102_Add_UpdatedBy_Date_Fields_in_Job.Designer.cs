@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OAuthLogin.DAL.Helper;
 
@@ -11,9 +12,11 @@ using OAuthLogin.DAL.Helper;
 namespace OAuthLogin.DAL.Migrations
 {
     [DbContext(typeof(OAuthDbContext))]
-    partial class OAuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240522053102_Add_UpdatedBy_Date_Fields_in_Job")]
+    partial class Add_UpdatedBy_Date_Fields_in_Job
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

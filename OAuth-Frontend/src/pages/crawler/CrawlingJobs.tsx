@@ -122,9 +122,7 @@ function CrawlingJobs() {
             </a>
             <button
               className="btn"
-              onClick={() =>
-                handleTrigger(row.jobId, row.recJob === 0 ? true : false)
-              }
+              onClick={() => handleTrigger(row.jobId, true)}
             >
               {row.recJob === 0 ? (
                 <i className="fa-solid fa-circle-play text-success "></i>
@@ -132,6 +130,12 @@ function CrawlingJobs() {
                 <i className="fa-solid fa-circle-pause text-danger"></i>
               )}
             </button>
+            <a className="btn" href={`/crawling-jobs/edit/${row.jobId}`}>
+              <i
+                className="fa fa-pen text-info"
+                style={{ fontSize: "large" }}
+              ></i>
+            </a>
           </div>
         </>
       ),

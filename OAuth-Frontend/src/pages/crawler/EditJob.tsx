@@ -1,81 +1,93 @@
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { useAddCrawlingJobMutation } from "../../redux/api/crawlingJobApi";
-import { openSnackbar } from "../../redux/slice/snackbarSlice";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../redux/hooks";
+import { useGetFormDataQuery } from "../../redux/api/crawlingJobApi";
+import { useForm } from "react-hook-form";
 import ParameterCard from "./ParameterCard";
 
-function AddNewJob() {
+function EditJob() {
+  const { jobId } = useParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const {
+    data: jobData,
+    error: jobError,
+    isLoading: jobLoading,
+  } = useGetFormDataQuery(parseInt(jobId || ""));
+  const {
     handleSubmit,
     register,
+    setValue,
     formState: { errors },
   } = useForm();
   const [showLevelParams, setShowLevelParams] = useState(false);
   const [showBaseParams, setShowBaseParams] = useState(false);
-  const [baseParams, setBaseParams] = useState([{ param: "", xpath: "" }]);
+  const [baseParams, setBaseParams] = useState([]);
   const [levelParams, setLevelParams] = useState([]);
   const [parentEl, setParentEl] = useState("");
   const [nextUrl, setNextUrl] = useState("");
 
-  const [addJob, { data, error: addJobError }] = useAddCrawlingJobMutation();
-
   useEffect(() => {
-    if (data?.success) {
-      dispatch(
-        openSnackbar({
-          severity: "success",
-          message: data.message,
-        })
+    if (jobData?.success) {
+      const { jobName, url, parameters } = jobData.data;
+      setValue("jobName", jobName);
+      setValue("url", url);
+
+      const baseParams = parameters.filter((param) => !param.isLevelParam);
+      const levelParams = parameters.filter((param) => param.isLevelParam);
+
+      setBaseParams(baseParams);
+      setLevelParams(levelParams);
+
+      const nextUrlParam = baseParams.find(
+        (param) => param.param === "nextURL"
       );
-      navigate("/crawling-jobs");
+      const parentElParam = baseParams.find(
+        (param) => param.param === "ParentEl"
+      );
+
+      if (nextUrlParam) {
+        setNextUrl(nextUrlParam.xpath);
+        setShowLevelParams(true);
+      }
+      if (parentElParam) {
+        setParentEl(parentElParam.xpath);
+        setShowBaseParams(true);
+      }
     }
-  }, [data]);
+  }, [jobData]);
 
-  useEffect(() => {
-    // console.log(error?.data.message);
-    if (addJobError?.data && !addJobError?.data.success)
-      dispatch(
-        openSnackbar({
-          severity: "error",
-          message: addJobError?.data.message,
-        })
-      );
-  }, [addJobError?.data]);
+  const onSubmit = (data) => {
+    const filteredBaseParams = baseParams.filter(
+      (param) => param.param !== "nextURL" && param.param !== "ParentEl"
+    );
 
-  const onSubmit = (data: unknown) => {
-    const obj: ApiTypes.AddCrawlingJobParams = {
+    const obj = {
       jobName: data.jobName,
       url: data.url,
       parameters: [
-        ...baseParams.map((param) => ({ ...param, isLevelParam: false })),
+        ...filteredBaseParams.map((param) => ({
+          ...param,
+          isLevelParam: false,
+        })),
       ],
     };
 
     if (nextUrl !== "") {
-      obj.parameters = [
-        ...obj.parameters,
-        {
-          param: "nextURL",
-          xpath: nextUrl,
-          attribute: "href",
-          isLevelParam: false,
-        },
-      ];
+      obj.parameters.push({
+        param: "nextURL",
+        xpath: nextUrl,
+        attribute: "href",
+        isLevelParam: false,
+      });
     }
 
     if (parentEl !== "") {
-      obj.parameters = [
-        ...obj.parameters,
-        {
-          param: "parentEl",
-          xpath: parentEl,
-          isLevelParam: false,
-        },
-      ];
+      obj.parameters.push({
+        param: "ParentEl",
+        xpath: parentEl,
+        isLevelParam: false,
+      });
     }
 
     if (levelParams.length > 0) {
@@ -85,8 +97,8 @@ function AddNewJob() {
       ];
     }
 
-    console.log(obj);
-    //addJob(obj);
+    console.log({ id: jobId, ...obj });
+    // updateJob({ id: jobId, ...obj });
   };
 
   const handleInputChange = (index, key, value, isLevel) => {
@@ -101,7 +113,7 @@ function AddNewJob() {
     }
   };
 
-  const handleRemoveIndex = (index: number, isLevel: boolean) => {
+  const handleRemoveIndex = (index, isLevel) => {
     if (!isLevel) {
       const params = [...baseParams];
       params.splice(index, 1);
@@ -113,23 +125,23 @@ function AddNewJob() {
     }
   };
 
-  const handleNextUrlChange = (e, isUrl: boolean) => {
+  const handleNextUrlChange = (e, isUrl) => {
     if (isUrl) {
       setNextUrl(e.target.value);
-      if (e.target.value !== "") {
-        setShowLevelParams(true);
-      } else {
-        setShowLevelParams(false);
-      }
+      setShowLevelParams(e.target.value !== "");
     } else {
       setParentEl(e.target.value);
-      if (e.target.value !== "") {
-        setShowBaseParams(true);
-      } else {
-        setShowBaseParams(false);
-      }
+      setShowBaseParams(e.target.value !== "");
     }
   };
+
+  if (jobLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (jobError) {
+    return <div>Error loading job data</div>;
+  }
 
   return (
     <>
@@ -138,13 +150,12 @@ function AddNewJob() {
           <div className="container-fluid">
             <div className="row mb-2">
               <div className="col-sm-6">
-                <h1>Add Crawling Job</h1>
+                <h1>Edit Crawling Job</h1>
               </div>
             </div>
           </div>
         </section>
         <section className="content">
-          {/* <div className="card card-primary"> */}
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="card card-primary">
               <div className="card-body">
@@ -181,7 +192,7 @@ function AddNewJob() {
                         pattern: {
                           value:
                             /^(http(s):\/\/.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/g,
-                          message: "Please enter a proper url.",
+                          message: "Please enter a proper URL.",
                         },
                       })}
                     />
@@ -205,9 +216,7 @@ function AddNewJob() {
                       type="text"
                       className="form-control"
                       id="parentEl"
-                      {...register("parentEl", {
-                        // Add validation rules if needed
-                      })}
+                      {...register("parentEl")}
                       value={parentEl}
                       onChange={(e) => handleNextUrlChange(e, false)}
                     />
@@ -242,13 +251,7 @@ function AddNewJob() {
                       type="text"
                       className="form-control"
                       id="nextUrl"
-                      {...register("nextUrl", {
-                        // pattern: {
-                        //   value:
-                        //     /^(http(s):\/\/.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/g,
-                        //   message: "Please enter a proper url.",
-                        // },
-                      })}
+                      {...register("nextUrl")}
                       value={nextUrl}
                       onChange={(e) => handleNextUrlChange(e, true)}
                     />
@@ -272,19 +275,17 @@ function AddNewJob() {
                 prefix="Level"
               />
             )}
-
             <button type="submit" className="btn btn-primary mt-3">
-              Add
+              Save Changes
             </button>
             <a href="/crawling-jobs" className="btn btn-link mt-3">
               Cancel
             </a>
           </form>
-          {/* </div> */}
         </section>
       </div>
     </>
   );
 }
 
-export default AddNewJob;
+export default EditJob;
