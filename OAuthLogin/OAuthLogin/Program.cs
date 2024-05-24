@@ -10,6 +10,7 @@ using OAuthLogin.BLL.Services;
 using OAuthLogin.BLL.SQLRepository;
 using OAuthLogin.DAL.Helper;
 using OAuthLogin.DAL.Models;
+using Serilog;
 
 namespace OAuthLogin
 {
@@ -26,6 +27,7 @@ namespace OAuthLogin
             .UseRecommendedSerializerSettings()
         .UseSqlServerStorage(builder.Configuration.GetConnectionString("Default")));
             builder.Services.AddHangfireServer();
+
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -58,7 +60,14 @@ namespace OAuthLogin
                 });
             });
 
+            builder.Host.UseSerilog((context, configuration) =>
+                 configuration.ReadFrom.Configuration(context.Configuration));
 
+            //Logger
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.File(@"../OAuthLogin/Logs/LogsData.txt")
+                .CreateLogger();
 
             builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -150,12 +159,15 @@ namespace OAuthLogin
             app.UseHttpsRedirection();
             app.UseCors("AllowAllOrigins");
 
+            //Add support to logging request with SERILOG
+            app.UseSerilogRequestLogging();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
 
             app.MapControllers();
-            
+
             app.UseHangfireDashboard();
             app.MapHangfireDashboard();
 
