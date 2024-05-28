@@ -16,10 +16,12 @@ function AddNewJob() {
   } = useForm();
   const [showLevelParams, setShowLevelParams] = useState(false);
   const [showBaseParams, setShowBaseParams] = useState(false);
-  const [baseParams, setBaseParams] = useState([{ param: "", xpath: "" }]);
+  const [baseParams, setBaseParams] = useState([]);
   const [levelParams, setLevelParams] = useState([]);
   const [parentEl, setParentEl] = useState("");
   const [nextUrl, setNextUrl] = useState("");
+  const [pageXPath, setPageXPath] = useState("");
+  const [buttonXPath, setButtonXPath] = useState("");
 
   const [addJob, { data, error: addJobError }] = useAddCrawlingJobMutation();
 
@@ -62,6 +64,28 @@ function AddNewJob() {
           param: "nextURL",
           xpath: nextUrl,
           attribute: "href",
+          isLevelParam: false,
+        },
+      ];
+    }
+
+    if (pageXPath !== "") {
+      obj.parameters = [
+        ...obj.parameters,
+        {
+          param: "PageXPath",
+          xpath: pageXPath,
+          isLevelParam: false,
+        },
+      ];
+    }
+
+    if (buttonXPath !== "") {
+      obj.parameters = [
+        ...obj.parameters,
+        {
+          param: "ButtonXPath",
+          xpath: buttonXPath,
           isLevelParam: false,
         },
       ];
@@ -128,6 +152,15 @@ function AddNewJob() {
       } else {
         setShowBaseParams(false);
       }
+    }
+  };
+
+  const handleXPathChange = (e, type) => {
+    const value = e.target.value;
+    if (type === "page") {
+      setPageXPath(value);
+    } else if (type === "button") {
+      setButtonXPath(value);
     }
   };
 
@@ -198,6 +231,43 @@ function AddNewJob() {
                         {errors.url.message}
                       </span>
                     )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="card card-primary">
+              <div className="card-body">
+                <div className="row ">
+                  <label className="col-2" htmlFor="pageXPath">
+                    Page XPath
+                  </label>
+                  <div className="col">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="pageXPath"
+                      value={pageXPath}
+                      onChange={(e) => handleXPathChange(e, "page")}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="card card-primary">
+              <div className="card-body">
+                <div className="row ">
+                  <label className="col-2" htmlFor="buttonXPath">
+                    Button XPath
+                  </label>
+                  <div className="col">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="buttonXPath"
+                      value={buttonXPath}
+                      onChange={(e) => handleXPathChange(e, "button")}
+                    />
                   </div>
                 </div>
               </div>

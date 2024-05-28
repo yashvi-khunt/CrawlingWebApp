@@ -7,7 +7,9 @@ using OAuthLogin.DAL.ViewModels;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
-using System.Runtime.InteropServices;
+using System;
+using System.Runtime.CompilerServices;
+using System.Xml;
 
 namespace OAuthLogin.BLL.Services
 {
@@ -96,17 +98,38 @@ namespace OAuthLogin.BLL.Services
         private ChromeDriver CreateChromeDriver()
         {
             var chromeOptions = new ChromeOptions();
-            chromeOptions.AddArguments("headless");
+            //chromeOptions.AddArguments("headless");
             return new ChromeDriver(chromeOptions);
         }
 
-        private Task NavigateToUrlAsync(ChromeDriver driver, string url,/* bool shouldWait*/ string xpath)
+        private Task NavigateToUrlAsync(ChromeDriver driver, string url, string xpath)
         {
 
             driver.Navigate().GoToUrl(url);
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
-            //if (shouldWait)
-            //{
+
+            var lastHeight = (long)driver.ExecuteScript("return document.body.scrollHeight");
+
+            while (true)
+            {
+                // Scroll down to the bottom of the page
+                driver.ExecuteScript("window.scrollTo(0, document.body.scrollHeight);");
+
+                // Wait for the new content to load
+                Thread.Sleep(2000); // Adjust the sleep time as necessary
+
+                // Check the new scroll height and compare it with the last scroll height
+                var newHeight = (long)driver.ExecuteScript("return document.body.scrollHeight");
+
+                if (newHeight == lastHeight)
+                {
+                    // End of page, break the loop
+                    break;
+                }
+
+                lastHeight = newHeight;
+            }
+
             try
             {
                 var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
@@ -118,21 +141,59 @@ namespace OAuthLogin.BLL.Services
                 Console.WriteLine("Page timed out after 10 secs.");
                 return null;
             }
-            //}
+
         }
 
-        private async Task ProcessJobParametersAsync(ChromeDriver driver, List<JobParameter> jobParams, string pxpath)
+        private Task NavigateToUrlAsync(ChromeDriver driver, Job job, string xpath, string btnXpath)
+        {
+            driver.Navigate().GoToUrl(job.URL);
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
+
+            while (true)
+            {
+                try
+                {
+                    var button = driver.FindElement(By.XPath(btnXpath));
+                    ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].click();", button);
+                    driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
+                }
+                catch (NoSuchElementException)
+                {
+                    Console.WriteLine("All buttons are clicked....");
+                    break;
+                }
+                catch (StaleElementReferenceException)
+                {
+                    Console.WriteLine("All buttons are clicked....");
+                    break;
+                }
+            }
+
+            try
+            {
+                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                var res = wait.Until(x => x.FindElements(By.XPath(xpath)));
+                return Task.FromResult(res.Count);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Page timed out after 10 secs.");
+                return null;
+            }
+
+        }
+
+        private async Task ProcessJobParametersAsync(ChromeDriver driver, List<JobParameter> jobParams, string pxpath, int prevCount, Job job)
         {
             var results = driver.FindElements(By.XPath(pxpath));
 
             if (results.Count == 0) return;
-            int count = 1;
+            int count = prevCount;
             foreach (var result in results)
             {
-
                 foreach (var param in jobParams)
                 {
-                    if (param.ParameterName == "ParentEl") continue;
+                    if (param.ParameterName == "ParentEl" || param.ParameterName == "PageXPath" || param.ParameterName == "ButtonXPath") continue;
 
                     var res = result.FindElement(By.XPath($".{param.XPath}"));
                     Console.WriteLine(res.Text);
@@ -156,6 +217,20 @@ namespace OAuthLogin.BLL.Services
                 }
                 count++;
             }
+
+            var pageUrlxpath = jobParams.FirstOrDefault(x => x.ParameterName == "PageXPath");
+            if (pageUrlxpath != null)
+            {
+                try
+                {
+                    var pageUrl = driver.FindElement(By.XPath($"{pageUrlxpath.XPath}")).GetAttribute(pageUrlxpath.Attribute);
+                    await NavigateAndProcessJobParameters(driver, job, pxpath, jobParams, count,pageUrl);
+                }
+                catch (NoSuchElementException ex)
+                {
+                    Console.WriteLine("Pagination Over......");
+                }
+            }
         }
 
         private async Task ProcessDetailParametersAsync(ChromeDriver driver, List<JobParameter> jobParams, int paramOrder)
@@ -167,9 +242,9 @@ namespace OAuthLogin.BLL.Services
                 {
                     result = driver.FindElement(By.XPath(param.XPath)).GetAttribute(param.Attribute) ?? "";
                 }
-                catch (NoSuchElementException)
+                catch (NoSuchElementException ex)
                 {
-                    // log error if needed
+                    Console.WriteLine($"Element not found....{paramOrder}.....{param.ParameterName}");
                 }
 
                 var existingJobResponse = await _context.JobResponses
@@ -190,6 +265,8 @@ namespace OAuthLogin.BLL.Services
                     await _context.JobResponses.AddAsync(jobResponse);
                 }
             }
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task GetData(int jobId)
@@ -208,11 +285,32 @@ namespace OAuthLogin.BLL.Services
             using (var driver = CreateChromeDriver())
             {
                 var parentxpath = jobParams.Find(x => x.ParameterName == "ParentEl").XPath;
-                await NavigateToUrlAsync(driver, job.URL, parentxpath);
-                await ProcessJobParametersAsync(driver, jobParams, parentxpath);
+                await NavigateAndProcessJobParameters(driver, job, parentxpath, jobParams, 1,job.URL);
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        private async Task NavigateAndProcessJobParameters(ChromeDriver driver, Job job, string parentXpath, List<JobParameter> jobParams, int count, string url)
+        {
+            var buttonXpath = jobParams.FirstOrDefault(x => x.ParameterName == "ButtonXPath");
+            if (buttonXpath != null)
+            {
+                await NavigateToUrlAsync(driver, job, parentXpath, buttonXpath.XPath);
+            }
+            else
+            {
+                await NavigateToUrlAsync(driver, url, parentXpath);
+            }
+            await ProcessJobParametersAsync(driver, jobParams, parentXpath, count, job);
         }
 
         public async Task GetDetailsData(int jobId)

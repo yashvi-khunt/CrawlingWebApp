@@ -34,6 +34,8 @@ function EditJob() {
   const [levelParams, setLevelParams] = useState([]);
   const [parentEl, setParentEl] = useState("");
   const [nextUrl, setNextUrl] = useState("");
+  const [pageXPath, setPageXPath] = useState("");
+  const [buttonXPath, setButtonXPath] = useState("");
 
   useEffect(() => {
     if (jobData?.success) {
@@ -53,9 +55,19 @@ function EditJob() {
       const parentElParam = baseParams.find(
         (param) => param.param === "ParentEl"
       );
+      const pageXPathParam = baseParams.find(
+        (param) => param.param === "PageXPath"
+      );
+      const buttonXPathParam = baseParams.find(
+        (param) => param.param === "ButtonXPath"
+      );
 
       const filteredBaseParams = baseParams.filter(
-        (param) => param.param !== "nextURL" && param.param !== "ParentEl"
+        (param) =>
+          param.param !== "nextURL" &&
+          param.param !== "ParentEl" &&
+          param.param !== "PageXPath" &&
+          param.param !== "ButtonXPath"
       );
       setBaseParams(filteredBaseParams);
 
@@ -67,14 +79,23 @@ function EditJob() {
         setParentEl(parentElParam.xpath);
         setShowBaseParams(true);
       }
+      if (pageXPathParam) {
+        setPageXPath(pageXPathParam.xpath);
+      }
+      if (buttonXPathParam) {
+        setButtonXPath(buttonXPathParam.xpath);
+      }
     }
   }, [jobData]);
 
   const onSubmit = (data) => {
     const filteredBaseParams = baseParams.filter(
-      (param) => param.param !== "nextURL" && param.param !== "ParentEl"
+      (param) =>
+        param.param !== "nextURL" &&
+        param.param !== "ParentEl" &&
+        param.param !== "PageXPath" &&
+        param.param !== "ButtonXPath"
     );
-
     const obj: ApiTypes.AddCrawlingJobParams = {
       jobName: data.jobName,
       url: data.url,
@@ -99,6 +120,22 @@ function EditJob() {
       obj.parameters.push({
         param: "ParentEl",
         xpath: parentEl,
+        isLevelParam: false,
+      });
+    }
+
+    if (pageXPath !== "") {
+      obj.parameters.push({
+        param: "PageXPath",
+        xpath: pageXPath,
+        isLevelParam: false,
+      });
+    }
+
+    if (buttonXPath !== "") {
+      obj.parameters.push({
+        param: "ButtonXPath",
+        xpath: buttonXPath,
         isLevelParam: false,
       });
     }
@@ -170,6 +207,15 @@ function EditJob() {
     } else {
       setParentEl(e.target.value);
       setShowBaseParams(e.target.value !== "");
+    }
+  };
+
+  const handleXPathChange = (e, type) => {
+    const value = e.target.value;
+    if (type === "page") {
+      setPageXPath(value);
+    } else if (type === "button") {
+      setButtonXPath(value);
     }
   };
 
@@ -245,6 +291,54 @@ function EditJob() {
                     {errors.url && (
                       <span className="error invalid-feedback">
                         {errors.url.message}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="card card-primary">
+              <div className="card-body">
+                <div className="row">
+                  <label className="col-2" htmlFor="pageXPath">
+                    Page Xpath
+                  </label>
+                  <div className="col">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="pageXPath"
+                      {...register("pageXPath")}
+                      value={pageXPath}
+                      onChange={(e) => handleXPathChange(e, "page")}
+                    />
+                    {errors.pageXPath && (
+                      <span className="error invalid-feedback">
+                        {errors.pageXPath.message}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="card card-primary">
+              <div className="card-body">
+                <div className="row">
+                  <label className="col-2" htmlFor="buttonXPath">
+                    Button Xpath
+                  </label>
+                  <div className="col">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="buttonXPath"
+                      {...register("buttonXPath")}
+                      value={buttonXPath}
+                      onChange={(e) => handleXPathChange(e, "button")}
+                    />
+                    {errors.buttonXPath && (
+                      <span className="error invalid-feedback">
+                        {errors.buttonXPath.message}
                       </span>
                     )}
                   </div>
